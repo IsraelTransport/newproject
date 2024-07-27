@@ -1,8 +1,22 @@
 const express = require('express');
-const router = express.Router();
-const { getBookings, createBooking } = require('./Bookings.Controller'); // Ensure this matches the file name exactly
+const {
+    getBookings,
+    getBooking,
+    createBooking,
+    updateBooking,
+    deleteBooking
+} = require('./Bookings.Controller');
 
-router.get('/', getBookings);
-router.post('/', createBooking);
+const router = express.Router();
+
+router.get('/GetAllBookings', getBookings);
+
+router.post('/CreateBooking', createBooking);
+
+router.get('/GetBooking/:id', getBooking);
+
+router.put('/UpdateBooking/:id', updateBooking);
+
+router.delete('/DeleteBooking/:id', deleteBooking);
 
 module.exports = router;

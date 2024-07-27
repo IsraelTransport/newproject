@@ -1,29 +1,12 @@
 const mongoose = require('mongoose');
 
-const bookingSchema = new mongoose.Schema({
-    UserID: {
-        type: Number,
-        required: true
-    },
-    BookingTypeID: {
-        type: Number,
-        required: true
-    },
-    TripID: {
-        type: Number,
-        required: true
-    },
-    BookingDate: {
-        type: Date,
-        default: Date.now
-    },
-    status: {
-        type: String,
-        default: 'Pending',
-        enum: ['Pending', 'Approved', 'Rejected'] // Valid statuses
-    }
-});
+const BookingSchema = new mongoose.Schema({
+    BookingID: { type: Number, required: true, unique: true },
+    UserID: { type: Number, required: true },
+    BookingTypeID: { type: Number, required: true },
+    TripID: { type: Number, required: true },
+    date: { type: Date, required: true },
+    status: { type: String, required: true, enum: ['Pending', 'Confirmed', 'Cancelled'] }
+}, { versionKey: false });
 
-const Booking = mongoose.model('Booking', bookingSchema);
-
-module.exports = Booking;
+module.exports = mongoose.model('Booking', BookingSchema);

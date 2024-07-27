@@ -1,15 +1,12 @@
+const mongoose = require('mongoose');
 
-const { getVehiclesFromDB } = require('./vehicles.db');
+const VehicleSchema = new mongoose.Schema({
+    VehicleID: { type: Number, required: true, unique: true },
+    make: { type: String, required: true },
+    model: { type: String, required: true },
+    year: { type: Number, required: true },
+    km: { type: Number, required: true },
+    vehicleType: { type: String, required: true, enum: ['Bus', 'MiniBus', 'Taxi'] }
+}, { versionKey: false });
 
-async function getVehicles() {
-    try {
-        return await getVehiclesFromDB();
-    } catch (error) {
-        throw error;
-    }
-}
-
-
-module.exports = {
-    getVehicles
-}
+module.exports = mongoose.model('Vehicle', VehicleSchema);
