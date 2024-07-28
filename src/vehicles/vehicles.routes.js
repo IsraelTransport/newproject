@@ -1,5 +1,5 @@
 const express = require('express');
-const { getVehicles, getVehicle, createVehicle, updateVehicle, deleteVehicle } = require('./Vehicles.Controller');
+const { getVehicles, getVehicle, createVehicle, updateVehicle, deleteVehicle } = require('./vehicles.controller');
 const router = express.Router();
 
 router.get('/GetAllVehicles', getVehicles);
