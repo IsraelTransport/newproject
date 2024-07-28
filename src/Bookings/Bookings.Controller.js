@@ -48,8 +48,6 @@ async function createBooking(req, res) {
 }
 
 
-
-
 async function updateBooking(req, res) {
     const { id } = req.params;
     const bookingData = req.body;
