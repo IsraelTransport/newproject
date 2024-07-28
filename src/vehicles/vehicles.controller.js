@@ -4,7 +4,7 @@ const {
     createVehicleInDB, 
     updateVehicleInDB, 
     deleteVehicleFromDB 
-} = require('./Vehicles.db');
+} = require('./vehicles.db');
 const Vehicle = require('./vehicles.model');
 
 async function getVehicles(req, res) {
