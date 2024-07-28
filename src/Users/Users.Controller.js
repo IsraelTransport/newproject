@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { getUserByUsername, getUsersFromDB, createUserInDB, getLastUserID } = require('./Users.db');
 
 const userTypeMap = {
