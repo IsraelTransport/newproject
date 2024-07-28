@@ -16,7 +16,7 @@ async function getBookings(req, res) {
         res.status(500).send({ error: 'Internal server error' });
     }
 }
-
+d
 async function getBooking(req, res) {
     const { id } = req.params;
     try {
