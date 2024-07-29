@@ -1,13 +1,13 @@
-class User {
-  constructor(fullName, username, email, password, userID, userTypeID, userType) {
-      this.fullName = fullName;
-      this.username = username;
-      this.email = email;
-      this.password = password;
-      this.userID = userID;
-      this.userTypeID = userTypeID;
-      this.userType = userType;
-  }
-}
+const mongoose = require('mongoose');
 
-module.exports = User;
+const UserSchema = new mongoose.Schema({
+    fullName: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    userID: { type: Number, required: true, unique: true },
+    userTypeID: { type: Number, required: true },
+    userType: { type: String, required: true }
+}, { versionKey: false });
+
+module.exports = mongoose.model('User', UserSchema);

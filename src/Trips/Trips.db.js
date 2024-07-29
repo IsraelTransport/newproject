@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const DB_INFO = {
     uri: process.env.CONNECTION_STRING,
@@ -6,13 +6,12 @@ const DB_INFO = {
     collection: 'Trips'
 };
 
-async function getTripsFromDB(query = {}, projection = {}) {
+async function getTripsFromDB() {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).find(query, { projection }).toArray();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).find().toArray();
     } catch (error) {
-        console.error('Error fetching trips:', error);
         throw error;
     } finally {
         await mongo.close();
@@ -23,7 +22,7 @@ async function getTripByID(id) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ TripID: parseInt(id) });
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ BookingID: parseInt(id) });
     } catch (error) {
         console.error('Error fetching trip by ID:', error);
         throw error;
@@ -32,11 +31,13 @@ async function getTripByID(id) {
     }
 }
 
-async function createReadyTripInDB(tripData) {
+async function createTripInDB(tripData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        await mongo.db(DB_INFO.name).collection(DB_INFO.collection).insertOne(tripData);
+        const result = await mongo.db(DB_INFO.name).collection(DB_INFO.collection).insertOne(tripData);
+        console.log('Trip created:', result);
+        return result.insertedId; // Return the ID of the created trip document
     } catch (error) {
         console.error('Error creating trip:', error);
         throw error;
@@ -45,11 +46,11 @@ async function createReadyTripInDB(tripData) {
     }
 }
 
-async function updateReadyTripInDB(id, tripData) {
+async function updateTripInDB(id, tripData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ TripID: parseInt(id) }, { $set: tripData });
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ BookingID: parseInt(id) }, { $set: tripData });
     } catch (error) {
         console.error('Error updating trip:', error);
         throw error;
@@ -58,11 +59,11 @@ async function updateReadyTripInDB(id, tripData) {
     }
 }
 
-async function deleteReadyTripFromDB(id) {
+async function deleteTripFromDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).deleteOne({ TripID: parseInt(id) });
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).deleteOne({ BookingID: parseInt(id) });
     } catch (error) {
         console.error('Error deleting trip:', error);
         throw error;
@@ -74,7 +75,7 @@ async function deleteReadyTripFromDB(id) {
 module.exports = {
     getTripsFromDB,
     getTripByID,
-    createReadyTripInDB,
-    updateReadyTripInDB,
-    deleteReadyTripFromDB
+    createTripInDB,
+    updateTripInDB,
+    deleteTripFromDB
 };

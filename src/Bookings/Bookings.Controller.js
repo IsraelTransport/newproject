@@ -1,11 +1,6 @@
-const { 
-    getBookingsFromDB, 
-    getBookingByID, 
-    createBookingInDB, 
-    updateBookingInDB, 
-    deleteBookingFromDB 
-} = require('./Bookings.db');
 const { getNextSequenceValue } = require('../counters.db');
+const { createBookingInDB, getBookingsFromDB, getBookingByID, updateBookingInDB, deleteBookingFromDB } = require('./Bookings.db');
+const Booking = require('./Bookings.Model');
 
 async function getBookings(req, res) {
     try {
@@ -17,44 +12,48 @@ async function getBookings(req, res) {
     }
 }
 
-async function getBooking(req, res) {
-    const { id } = req.params;
+async function createBooking(req, res) {
+    const { UserID, VehicleID, status, DepartureTime, Passengers, PickupAddress, DropOffAddress, FullName, Email, PhoneNumber } = req.body;
+
+    if (!UserID || !VehicleID || !status || !DepartureTime || !Passengers || !PickupAddress || !DropOffAddress || !FullName || !Email || !PhoneNumber) {
+        return res.status(400).send({ error: 'All fields are required' });
+    }
+
     try {
-        const booking = await getBookingByID(id);
-        if (booking) {
-            res.status(200).send(booking);
-        } else {
-            res.status(404).send({ error: 'Booking not found' });
-        }
+        const bookingID = await getNextSequenceValue('Bookings');
+        const newBooking = new Booking({ 
+            BookingID: bookingID, 
+            UserID, 
+            VehicleID, 
+            status, 
+            DepartureTime, 
+            Passengers, 
+            PickupAddress, 
+            DropOffAddress, 
+            FullName, 
+            Email, 
+            PhoneNumber 
+        });
+        await createBookingInDB(newBooking);
+        res.status(201).send({ message: 'Booking created successfully' });
     } catch (error) {
-        console.error('Error fetching booking:', error);
+        console.error('Error creating booking:', error);
         res.status(500).send({ error: 'Internal server error' });
     }
 }
 
-
-async function createBooking(req, res) {
-    const bookingData = req.body;
-    try {
-        bookingData.BookingID = await getNextSequenceValue('Bookings');
-        console.log(`Creating booking with BookingID: ${bookingData.BookingID}`);
-        console.log('Booking data:', bookingData); // Log the booking data being sent
-        const createdBookingId = await createBookingInDB(bookingData);
-        res.status(201).send({ message: 'Booking created successfully', bookingId: createdBookingId });
-    } catch (error) {
-        console.error('Error creating booking:', error.message);
-        res.status(500).send({ error: 'Internal server error', details: error.message });
-    }
-}
-
-
 async function updateBooking(req, res) {
     const { id } = req.params;
-    const bookingData = req.body;
+    const { status } = req.body;
+
+    if (!status) {
+        return res.status(400).send({ error: 'Status is required' });
+    }
+
     try {
-        const updatedBooking = await updateBookingInDB(id, bookingData);
+        const updatedBooking = await updateBookingInDB(id, { status });
         if (updatedBooking.modifiedCount > 0) {
-            res.status(200).send({ message: 'Booking updated successfully' });
+            res.status(200).send({ message: 'Booking updated successfully', booking: updatedBooking });
         } else {
             res.status(404).send({ error: 'Booking not found' });
         }
@@ -66,6 +65,7 @@ async function updateBooking(req, res) {
 
 async function deleteBooking(req, res) {
     const { id } = req.params;
+
     try {
         const deletedBooking = await deleteBookingFromDB(id);
         if (deletedBooking.deletedCount > 0) {
@@ -79,7 +79,4 @@ async function deleteBooking(req, res) {
     }
 }
 
-module.exports = { getBookings, getBooking, createBooking, updateBooking, deleteBooking };
-
-
-module.exports = { getBookings, getBooking, createBooking, updateBooking, deleteBooking };
+module.exports = { getBookings, createBooking, updateBooking, deleteBooking };

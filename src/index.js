@@ -3,9 +3,9 @@ const router = express.Router();
 
 const vehiclesRoutes = require('./vehicles/vehicles.routes');
 const usersRoutes = require('./Users/User.Routes');
-const bookingsRoutes = require('./Bookings/Bookings.Routes');
-const bookingTypesRoutes = require('./BookingTypes/BookingTypes.Routes'); 
 const tripsRoutes = require('./Trips/Trips.Routes');
+const bookingTypesRoutes = require('./BookingTypes/BookingTypes.Routes'); 
+const bookingsRoutes = require('./Bookings/Bookings.Routes');
 const userTypesRoutes = require('./UserTypes/UserTypes.Routes');
 
 router.use('/vehicles', vehiclesRoutes);

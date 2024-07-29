@@ -1,5 +1,5 @@
 const { getNextSequenceValue } = require('../counters.db');
-const { createReadyTripInDB, getTripsFromDB, getTripByID, updateReadyTripInDB, deleteReadyTripFromDB } = require('./Trips.db');
+const { createTripInDB, getTripsFromDB, getTripByID, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
 
 async function getTrips(req, res) {
@@ -12,36 +12,49 @@ async function getTrips(req, res) {
     }
 }
 
-async function createTrip(req, res) {
-    const { BookingID, UserID, status, DepartureTime, AvailableSeats, Passengers, VehicleID } = req.body;
+async function getTrip(req, res) {
+    const { id } = req.params;
+    try {
+        const trip = await getTripByID(id);
+        if (trip) {
+            res.status(200).send(trip);
+        } else {
+            res.status(404).send({ error: 'Trip not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching trip:', error);
+        res.status(500).send({ error: 'Internal server error' });
+    }
+}
 
-    if (!BookingID || !UserID || !status || !DepartureTime || !AvailableSeats || !Passengers || !VehicleID) {
+async function createTrip(req, res) {
+    const { TripName, TripType, OpenHour, CloseHour, Description } = req.body;
+
+    if (!TripName || !TripType || !OpenHour || !CloseHour || !Description) {
         return res.status(400).send({ error: 'All fields are required' });
     }
 
     try {
         const tripID = await getNextSequenceValue('Trips');
-        const newTrip = { TripID: tripID, BookingID, UserID, status, DepartureTime, AvailableSeats, Passengers, VehicleID };
-        await createReadyTripInDB(newTrip);
-        res.status(201).send({ message: 'Trip created successfully' });
+        const newTrip = { TripID: tripID, TripName, TripType, OpenHour, CloseHour, Description };
+        console.log('Creating trip:', newTrip); // Log the trip data for debugging
+        await createTripInDB(newTrip);
+        res.status(201).send({ message: 'Trip created successfully', tripId: tripID });
     } catch (error) {
-        console.error('Error creating trip:', error);
-        res.status(500).send({ error: 'Internal server error' });
+        console.error('Error creating trip:', error.message);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
 
+
+
 async function updateTrip(req, res) {
     const { id } = req.params;
-    const { status } = req.body;
-
-    if (!status) {
-        return res.status(400).send({ error: 'Status is required' });
-    }
-
+    const tripData = req.body;
     try {
-        const updatedTrip = await updateReadyTripInDB(id, { status });
+        const updatedTrip = await updateTripInDB(id, tripData);
         if (updatedTrip.modifiedCount > 0) {
-            res.status(200).send({ message: 'Trip updated successfully', trip: updatedTrip });
+            res.status(200).send({ message: 'Trip updated successfully' });
         } else {
             res.status(404).send({ error: 'Trip not found' });
         }
@@ -53,9 +66,8 @@ async function updateTrip(req, res) {
 
 async function deleteTrip(req, res) {
     const { id } = req.params;
-
     try {
-        const deletedTrip = await deleteReadyTripFromDB(id);
+        const deletedTrip = await deleteTripFromDB(id);
         if (deletedTrip.deletedCount > 0) {
             res.status(200).send({ message: 'Trip deleted successfully' });
         } else {
@@ -67,4 +79,4 @@ async function deleteTrip(req, res) {
     }
 }
 
-module.exports = { getTrips, createTrip, updateTrip, deleteTrip };
+module.exports = { getTrips, getTrip, createTrip, updateTrip, deleteTrip };

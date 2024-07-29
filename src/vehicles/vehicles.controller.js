@@ -33,13 +33,13 @@ async function getVehicle(req, res) {
 }
 
 async function createVehicle(req, res) {
-    const { VehicleID, make, model, year, km, vehicleType } = req.body;
-    if (!VehicleID || !make || !model || !year || !km || !vehicleType) {
+    const { VehicleID, Make, Model, Year, Km, vehicleType } = req.body;
+    if (!VehicleID || !Make || !Model || !Year || !Km || !vehicleType) {
         return res.status(400).send({ error: 'All vehicle details are required' });
     }
 
     try {
-        const newVehicle = new Vehicle({ VehicleID, make, model, year, km, vehicleType });
+        const newVehicle = new Vehicle({ VehicleID, Make, Model, Year, Km, vehicleType });
         await createVehicleInDB(newVehicle);
         res.status(201).send({ message: 'Vehicle created successfully' });
     } catch (error) {
