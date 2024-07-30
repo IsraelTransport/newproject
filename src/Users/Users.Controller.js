@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const { getUserByUsername, getUsersFromDB, getLastUserID, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
 
 const userTypeMap = {
@@ -15,25 +16,33 @@ async function checkUserCredentials(req, res) {
     }
 
     try {
-        const user = await User.findOne({ username });
-        if (user && await bcrypt.compare(password, user.password)) {
-            const { _id, fullName, email, userType } = user;
-            res.status(200).send({
-                message: 'User authenticated successfully',
-                user: { _id, fullName, username, email, userType }
-            });
-        } else {
-            res.status(401).send({ error: 'Invalid username or password' });
+        const user = await getUserByUsername(username);
+        if (!user) {
+            console.log('User not found');
+            return res.status(401).send({ error: 'Invalid username or password' });
         }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            console.log('Invalid password');
+            return res.status(401).send({ error: 'Invalid username or password' });
+        }
+
+        const { userID, fullName, email, userType } = user;
+        res.status(200).send({
+            message: 'User authenticated successfully',
+            user: { userID, fullName, username, email, userType }
+        });
     } catch (error) {
         console.error('Error checking user credentials:', error);
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
 
+
 async function listAllUsers(req, res) {
     try {
-        const users = await User.find();
+        const users = await getUsersFromDB();
         res.status(200).send(users);
     } catch (error) {
         console.error('Error listing all users:', error);
@@ -53,20 +62,20 @@ async function createUser(req, res) {
     }
 
     try {
-        const lastUser = await User.findOne().sort({ userID: -1 });
+        const lastUser = await getLastUserID();
         const newUserID = lastUser ? lastUser.userID + 1 : 1;
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ 
-            fullName, 
-            username, 
-            email, 
-            password: hashedPassword, 
+        const user = {
+            fullName,
+            username,
+            email,
+            password: hashedPassword,
             userID: newUserID,
             userTypeID: userTypeID,
-            userType: userTypeMap[userTypeID] 
-        });
-        await user.save();
+            userType: userTypeMap[userTypeID]
+        };
+        await createUserInDB(user);
         res.status(201).send({ message: 'User created successfully' });
     } catch (error) {
         console.error('Error creating user:', error);
