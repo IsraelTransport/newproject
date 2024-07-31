@@ -6,7 +6,7 @@ const {
     deleteVehicleFromDB 
 } = require('./vehicles.db');
 const Vehicle = require('./vehicles.model');
-
+const {getNextSequenceValue} = require('../counters.db')
 async function getVehicles(req, res) {
     try {
         const vehicles = await getVehiclesFromDB();
@@ -33,12 +33,13 @@ async function getVehicle(req, res) {
 }
 
 async function createVehicle(req, res) {
-    const { VehicleID, Make, Model, Year, Km, vehicleType } = req.body;
-    if (!VehicleID || !Make || !Model || !Year || !Km || !vehicleType) {
+    const { Make, Model, Year, Km, vehicleType } = req.body; // Removed VehicleID from req.body
+    if (!Make || !Model || !Year || !Km || !vehicleType) {
         return res.status(400).send({ error: 'All vehicle details are required' });
     }
 
     try {
+        const VehicleID = await getNextSequenceValue('Vehicles'); // Get next sequence value
         const newVehicle = new Vehicle({ VehicleID, Make, Model, Year, Km, vehicleType });
         await createVehicleInDB(newVehicle);
         res.status(201).send({ message: 'Vehicle created successfully' });

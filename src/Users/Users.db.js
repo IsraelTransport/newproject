@@ -5,7 +5,20 @@ const DB_INFO = {
     name: process.env.DB_NAME,
     collection: 'Users'
 };
-
+async function getUserByIDInDB(userID) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        const database = mongo.db(DB_INFO.name);
+        const users = database.collection(DB_INFO.collection);
+        const user = await users.findOne({ userID: parseInt(userID) }); // Ensure userID is parsed as an integer
+        return user;
+    } catch (error) {
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
 async function getUsersFromDB(query = {}, projection = {}) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
@@ -66,5 +79,6 @@ module.exports = {
     getUsersFromDB,
     getUserByUsername,
     getLastUserID,
-    createUserInDB
+    createUserInDB,
+    getUserByIDInDB
 };

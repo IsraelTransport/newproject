@@ -19,7 +19,7 @@ async function getBookingsFromDB(query = {}, projection = {}) {
     }
 }
 
-async function getBookingByID(id) {
+async function getBookingByIDInDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
@@ -73,7 +73,7 @@ async function deleteBookingFromDB(id) {
 
 module.exports = {
     getBookingsFromDB,
-    getBookingByID,
+    getBookingByIDInDB,
     createBookingInDB,
     updateBookingInDB,
     deleteBookingFromDB

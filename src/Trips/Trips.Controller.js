@@ -35,11 +35,10 @@ async function createTrip(req, res) {
     }
 
     try {
-        const tripID = await getNextSequenceValue('Trips');
-        const newTrip = { TripID: tripID, TripName, TripType, OpenHour, CloseHour, Description };
-        console.log('Creating trip:', newTrip); // Log the trip data for debugging
+        const TripID = await getNextSequenceValue('Trips'); // Get next sequence value
+        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description };
         await createTripInDB(newTrip);
-        res.status(201).send({ message: 'Trip created successfully', tripId: tripID });
+        res.status(201).send({ message: 'Trip created successfully', tripId: TripID });
     } catch (error) {
         console.error('Error creating trip:', error.message);
         res.status(500).send({ error: 'Internal server error', details: error.message });

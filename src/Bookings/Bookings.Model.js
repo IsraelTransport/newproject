@@ -11,7 +11,11 @@ const BookingSchema = new mongoose.Schema({
     DropOffAddress: { type: String, required: true },
     FullName: { type: String, required: true },
     Email: { type: String, required: true },
-    PhoneNumber: { type: String, required: true }
+    PhoneNumber: { type: String, required: true },
+    startTrailDate: { type: Date, required: true }, 
+    endTrailDate: { type: Date, required: true },
+    stopStations: {type: [String], required:false },
+    notes: {type: String, required:false}
 }, { versionKey: false });
 
 module.exports = mongoose.model('Booking', BookingSchema, 'Bookings');

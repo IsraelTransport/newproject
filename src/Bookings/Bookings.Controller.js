@@ -1,5 +1,5 @@
 const { getNextSequenceValue } = require('../counters.db');
-const { createBookingInDB, getBookingsFromDB, getBookingByID, updateBookingInDB, deleteBookingFromDB } = require('./Bookings.db');
+const { createBookingInDB, getBookingsFromDB, getBookingByIDInDB, updateBookingInDB, deleteBookingFromDB } = require('./Bookings.db');
 const Booking = require('./Bookings.Model');
 
 async function getBookings(req, res) {
@@ -12,27 +12,46 @@ async function getBookings(req, res) {
     }
 }
 
-async function createBooking(req, res) {
-    const { UserID, VehicleID, status, DepartureTime, Passengers, PickupAddress, DropOffAddress, FullName, Email, PhoneNumber } = req.body;
+async function getBookingByID(req, res) {
+    const { id } = req.params;
+    try {
+        const booking = await getBookingByIDInDB(id);
+        if (booking) {
+            res.status(200).send(booking);
+        } else {
+            res.status(404).send({ error: 'Booking not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching booking by ID:', error);
+        res.status(500).send({ error: 'Internal server error' });
+    }
+}
 
-    if (!UserID || !VehicleID || !status || !DepartureTime || !Passengers || !PickupAddress || !DropOffAddress || !FullName || !Email || !PhoneNumber) {
-        return res.status(400).send({ error: 'All fields are required' });
+async function createBooking(req, res) {
+    const { UserID, VehicleID, status, DepartureTime, Passengers, PickupAddress, DropOffAddress, FullName, Email, PhoneNumber, startTrailDate, endTrailDate, stopStations, notes } = req.body;
+
+    if (!UserID || !VehicleID || !status || !DepartureTime || !Passengers || !PickupAddress || !DropOffAddress || !FullName || !Email || !PhoneNumber || !startTrailDate || !endTrailDate) {
+        return res.status(400).send({ error: 'All required fields must be provided' });
     }
 
     try {
         const bookingID = await getNextSequenceValue('Bookings');
-        const newBooking = new Booking({ 
-            BookingID: bookingID, 
-            UserID, 
-            VehicleID, 
-            status, 
-            DepartureTime, 
-            Passengers, 
-            PickupAddress, 
-            DropOffAddress, 
-            FullName, 
-            Email, 
-            PhoneNumber 
+        const newBooking = new Booking({
+            BookingID: bookingID,
+            UserID,
+            VehicleID,
+            status,
+            DepartureTime,
+            Passengers,
+            PickupAddress,
+            DropOffAddress,
+            FullName,
+            Email,
+            PhoneNumber,
+            startTrailDate,
+            endTrailDate,
+            ...(stopStations && { stopStations }),
+            notes
         });
         await createBookingInDB(newBooking);
         res.status(201).send({ message: 'Booking created successfully' });
@@ -41,6 +60,7 @@ async function createBooking(req, res) {
         res.status(500).send({ error: 'Internal server error' });
     }
 }
+
 
 async function updateBooking(req, res) {
     const { id } = req.params;
@@ -79,4 +99,4 @@ async function deleteBooking(req, res) {
     }
 }
 
-module.exports = { getBookings, createBooking, updateBooking, deleteBooking };
+module.exports = { getBookings, getBookingByID, createBooking, updateBooking, deleteBooking };

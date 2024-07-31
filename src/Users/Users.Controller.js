@@ -1,13 +1,26 @@
 const bcrypt = require('bcryptjs');
-const { getUserByUsername, getUsersFromDB, getLastUserID, createUserInDB } = require('./Users.db');
+const { getUserByUsername,getUserByIDInDB , getUsersFromDB, getLastUserID, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
-
+const {getNextSequenceValue} = require('../counters.db')
 const userTypeMap = {
     1: 'admin',
     2: 'client',
     3: 'driver'
 };
+async function GetUserByID(req, res){
+    const { userID } = req.params; 
 
+    try {
+        const user = await getUserByIDInDB(userID);
+        if (!user) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+        res.status(200).send(user);
+    } catch (error) {
+        console.error('Error fetching user by ID:', error);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
+}
 async function checkUserCredentials(req, res) {
     const { username, password } = req.body;
 
@@ -51,10 +64,10 @@ async function listAllUsers(req, res) {
 }
 
 async function createUser(req, res) {
-    const { fullName, username, email, password, userTypeID } = req.body;
+    const { fullName, username, email, password, language, residence, userTypeID } = req.body;
 
-    if (!fullName || !username || !email || !password || userTypeID === undefined) {
-        return res.status(400).send({ error: 'Full name, username, email, password, and user type are required' });
+    if (!fullName || !username || !email || !password || !language || !residence || userTypeID === undefined) {
+        return res.status(400).send({ error: 'Full name, username, email, password, language, and user type are required' });
     }
 
     if (![1, 2, 3].includes(userTypeID)) {
@@ -62,8 +75,7 @@ async function createUser(req, res) {
     }
 
     try {
-        const lastUser = await getLastUserID();
-        const newUserID = lastUser ? lastUser.userID + 1 : 1;
+        const userID = await getNextSequenceValue('Users'); 
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = {
@@ -71,8 +83,10 @@ async function createUser(req, res) {
             username,
             email,
             password: hashedPassword,
-            userID: newUserID,
-            userTypeID: userTypeID,
+            language,
+            residence,
+            userID,
+            userTypeID,
             userType: userTypeMap[userTypeID]
         };
         await createUserInDB(user);
@@ -83,4 +97,5 @@ async function createUser(req, res) {
     }
 }
 
-module.exports = { checkUserCredentials, listAllUsers, createUser };
+
+module.exports = { checkUserCredentials, listAllUsers, createUser, GetUserByID };
