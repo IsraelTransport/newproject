@@ -46,21 +46,6 @@ async function getUserByUsername(username) {
     }
 }
 
-async function getLastUserID() {
-    let mongo = new MongoClient(DB_INFO.uri);
-    try {
-        await mongo.connect();
-        const database = mongo.db(DB_INFO.name);
-        const users = database.collection(DB_INFO.collection);
-        const lastUser = await users.findOne({}, { sort: { UserID: -1 } });
-        return lastUser;
-    } catch (error) {
-        throw error;
-    } finally {
-        await mongo.close();
-    }
-}
-
 async function createUserInDB(user) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
@@ -78,7 +63,6 @@ async function createUserInDB(user) {
 module.exports = {
     getUsersFromDB,
     getUserByUsername,
-    getLastUserID,
     createUserInDB,
     getUserByIDInDB
 };

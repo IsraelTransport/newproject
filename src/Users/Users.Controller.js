@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { getUserByUsername,getUserByIDInDB , getUsersFromDB, getLastUserID, createUserInDB } = require('./Users.db');
+const { getUserByUsername,getUserByIDInDB , getUsersFromDB, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
 const {getNextSequenceValue} = require('../counters.db')
 const userTypeMap = {
@@ -21,6 +21,22 @@ async function GetUserByID(req, res){
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
+
+async function getUserIDByUsername(req, res) {
+    const { username } = req.params;
+    try {
+        const user = await getUserByUsername(username);
+        if (!user) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+        res.status(200).send({ userID: user.userID });
+    } catch (error) {
+        console.error('Error fetching user by username:', error);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
+}
+
+
 async function checkUserCredentials(req, res) {
     const { username, password } = req.body;
 
@@ -98,4 +114,4 @@ async function createUser(req, res) {
 }
 
 
-module.exports = { checkUserCredentials, listAllUsers, createUser, GetUserByID };
+module.exports = { checkUserCredentials, getUserIDByUsername, listAllUsers, createUser, GetUserByID };
