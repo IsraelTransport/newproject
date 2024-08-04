@@ -5,7 +5,7 @@ const ReportSchema = new mongoose.Schema({
     UserID: { type: Number, required: true },
     Message: { type: String, required: true },
     Timestamp: { type: Date, default: Date.now, required: true },
-    Status: { type: String, required: true, enum: ['Pending', 'Reviewed', 'Resolved'] }
+    Status: { type: String, required: true, enum: ['Pending', 'Reviewed', 'Resolved'], default: 'Pending' }
 }, { versionKey: false });
 
 module.exports = mongoose.model('Report', ReportSchema);

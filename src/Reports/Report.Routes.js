@@ -1,9 +1,11 @@
 const express = require('express');
-const { createReport, getReports, getReport } = require('./Report.Controller');
+const { getReports, createReport,getReportByID, deleteReport, updateReport } = require('./Report.Controller');
 const router = express.Router();
 
-router.post('/CreateReport', createReport);
-router.get('/GetAllReports', getReports);
-router.get('/GetReport/:id', getReport);
+router.get('/', getReports);
+router.post('/create', createReport);
+router.delete('/delete/:id', deleteReport);
+router.put('/update/:id', updateReport);
+router.get('/:id', getReportByID); // New route for getting a report by ID
 
 module.exports = router;

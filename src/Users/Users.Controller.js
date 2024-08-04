@@ -80,10 +80,10 @@ async function listAllUsers(req, res) {
 }
 
 async function createUser(req, res) {
-    const { fullName, username, email, password, language, residence, userTypeID } = req.body;
+    const { fullName, username, email, password, language, country, city, userTypeID } = req.body;
 
-    if (!fullName || !username || !email || !password || !language || !residence || userTypeID === undefined) {
-        return res.status(400).send({ error: 'Full name, username, email, password, language, and user type are required' });
+    if (!fullName || !username || !email || !password || !language || !country || !city || userTypeID === undefined) {
+        return res.status(400).send({ error: 'Full name, username, email, password, language, country, city, and user type are required' });
     }
 
     if (![1, 2, 3].includes(userTypeID)) {
@@ -100,7 +100,8 @@ async function createUser(req, res) {
             email,
             password: hashedPassword,
             language,
-            residence,
+            country,
+            city,
             userID,
             userTypeID,
             userType: userTypeMap[userTypeID]
@@ -112,6 +113,7 @@ async function createUser(req, res) {
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
+
 
 
 module.exports = { checkUserCredentials, getUserIDByUsername, listAllUsers, createUser, GetUserByID };
