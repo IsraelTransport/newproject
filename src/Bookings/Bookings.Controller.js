@@ -64,16 +64,43 @@ async function createBooking(req, res) {
 
 async function updateBooking(req, res) {
     const { id } = req.params;
-    const { status } = req.body;
-
-    if (!status) {
-        return res.status(400).send({ error: 'Status is required' });
-    }
+    const { 
+        UserID, 
+        VehicleID, 
+        status, 
+        DepartureTime, 
+        Passengers, 
+        PickupAddress, 
+        DropOffAddress, 
+        FullName, 
+        Email, 
+        PhoneNumber, 
+        startTrailDate, 
+        endTrailDate, 
+        stopStations, 
+        notes 
+    } = req.body;
 
     try {
-        const updatedBooking = await updateBookingInDB(id, { status });
+        const updatedBooking = await updateBookingInDB(id, { 
+            UserID, 
+            VehicleID, 
+            status, 
+            DepartureTime, 
+            Passengers, 
+            PickupAddress, 
+            DropOffAddress, 
+            FullName, 
+            Email, 
+            PhoneNumber, 
+            startTrailDate, 
+            endTrailDate, 
+            stopStations, 
+            notes 
+        });
+
         if (updatedBooking.modifiedCount > 0) {
-            res.status(200).send({ message: 'Booking updated successfully', booking: updatedBooking });
+            res.status(200).send({ message: 'Booking updated successfully' });
         } else {
             res.status(404).send({ error: 'Booking not found' });
         }
@@ -82,6 +109,9 @@ async function updateBooking(req, res) {
         res.status(500).send({ error: 'Internal server error' });
     }
 }
+
+module.exports = { updateBooking };
+
 
 async function deleteBooking(req, res) {
     const { id } = req.params;

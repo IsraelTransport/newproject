@@ -49,7 +49,10 @@ async function updateBookingInDB(id, bookingData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ BookingID: parseInt(id) }, { $set: bookingData });
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne(
+            { BookingID: parseInt(id) },
+            { $set: bookingData }
+        );
     } catch (error) {
         console.error('Error updating booking:', error);
         throw error;
@@ -57,6 +60,7 @@ async function updateBookingInDB(id, bookingData) {
         await mongo.close();
     }
 }
+
 
 async function deleteBookingFromDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
