@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { getUserByUsername,getUserByIDInDB , getUsersFromDB, createUserInDB } = require('./Users.db');
+const { getUserByUsername, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
 const {getNextSequenceValue} = require('../counters.db')
 const userTypeMap = {
@@ -80,7 +80,7 @@ async function listAllUsers(req, res) {
 }
 
 async function createUser(req, res) {
-    const { fullName, username, email, password, language, country, city, userTypeID, drivingLicense } = req.body;
+    const { fullName, username, email, password, language, country, city, userTypeID } = req.body;
 
     if (!fullName || !username || !email || !password || !language || !country || !city || userTypeID === undefined) {
         return res.status(400).send({ error: 'Full name, username, email, password, language, country, city, and user type are required' });
@@ -104,8 +104,6 @@ async function createUser(req, res) {
             city,
             userID,
             userTypeID,
-            userType: userTypeMap[userTypeID],
-            drivingLicense: drivingLicense || null // Include drivingLicense if provided
         };
         await createUserInDB(user);
         res.status(201).send({ message: 'User created successfully' });
@@ -116,6 +114,54 @@ async function createUser(req, res) {
 }
 
 
+async function deleteUser(req, res) {
+    const { userID } = req.params;
 
+    try {
+        const result = await deleteUserFromDB(userID);
+        if (result.deletedCount > 0) {
+            res.status(200).send({ message: 'User deleted successfully' });
+        } else {
+            res.status(404).send({ error: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
+}
 
-module.exports = { checkUserCredentials, getUserIDByUsername, listAllUsers, createUser, GetUserByID };
+async function editUser(req, res) {
+    const { userID } = req.params;
+    const { fullName, username, email, password, language, country, city, userTypeID, drivingLicense } = req.body;
+
+    if (!fullName || !username || !email || !password || !language || !country || !city || userTypeID === undefined) {
+        return res.status(400).send({ error: 'All fields are required' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const updatedUser = {
+            fullName,
+            username,
+            email,
+            password: hashedPassword,
+            language,
+            country,
+            city,
+            userTypeID,
+            userType: userTypeMap[userTypeID],
+            drivingLicense
+        };
+        const result = await updateUserInDB(userID, updatedUser);
+        if (result.modifiedCount > 0) {
+            res.status(200).send({ message: 'User updated successfully' });
+        } else {
+            res.status(404).send({ error: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
+}
+
+module.exports = { checkUserCredentials, getUserIDByUsername, editUser ,deleteUser, listAllUsers, createUser, GetUserByID };

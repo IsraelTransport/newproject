@@ -60,9 +60,35 @@ async function createUserInDB(user) {
     }
 }
 
+async function deleteUserFromDB(userID) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).deleteOne({ userID: parseInt(userID) });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
+async function updateUserInDB(userID, updatedUser) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ userID: parseInt(userID) }, { $set: updatedUser });
+    } catch (error) {
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
+
 module.exports = {
     getUsersFromDB,
     getUserByUsername,
     createUserInDB,
-    getUserByIDInDB
+    getUserByIDInDB,
+    deleteUserFromDB,
+    updateUserInDB
 };
