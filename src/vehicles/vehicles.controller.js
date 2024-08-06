@@ -33,14 +33,14 @@ async function getVehicle(req, res) {
 }
 
 async function createVehicle(req, res) {
-    const { Make, Model, Year, Km, vehicleType } = req.body; // Removed VehicleID from req.body
-    if (!Make || !Model || !Year || !Km || !vehicleType) {
+    const { Make, Model, Year, Km, vehicleType, carPlateNumber } = req.body;
+    if (!Make || !Model || !Year || !Km || !vehicleType || !carPlateNumber) {
         return res.status(400).send({ error: 'All vehicle details are required' });
     }
 
     try {
         const VehicleID = await getNextSequenceValue('Vehicles'); // Get next sequence value
-        const newVehicle = new Vehicle({ VehicleID, Make, Model, Year, Km, vehicleType });
+        const newVehicle = new Vehicle({ VehicleID, Make, Model, Year, Km, vehicleType, carPlateNumber });
         await createVehicleInDB(newVehicle);
         res.status(201).send({ message: 'Vehicle created successfully' });
     } catch (error) {
@@ -48,6 +48,7 @@ async function createVehicle(req, res) {
         res.status(500).send({ error: 'Internal server error' });
     }
 }
+
 
 async function updateVehicle(req, res) {
     const { id } = req.params;
