@@ -18,11 +18,11 @@ async function getTripsFromDB() {
     }
 }
 
-async function getTripByID(id) {
+async function getTripByIDFromDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ BookingID: parseInt(id) });
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ TripID: parseInt(id) });
     } catch (error) {
         console.error('Error fetching trip by ID:', error);
         throw error;
@@ -63,7 +63,10 @@ async function updateTripInDB(id, tripData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ BookingID: parseInt(id) }, { $set: tripData });
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne(
+            { TripID: parseInt(id) },
+            { $set: tripData }
+        );
     } catch (error) {
         console.error('Error updating trip:', error);
         throw error;
@@ -84,12 +87,24 @@ async function deleteTripFromDB(id) {
         await mongo.close();
     }
 }
-
+async function deleteAllTripsFromDB() {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).deleteMany({});
+    } catch (error) {
+        console.error('Error deleting all trips:', error);
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
 module.exports = {
     getTripsFromDB,
-    getTripByID,
+    getTripByIDFromDB,
     createTripInDB,
     updateTripInDB,
     deleteTripFromDB,
-    getTripIDByNameFromDB
+    getTripIDByNameFromDB,
+    deleteAllTripsFromDB
 };
