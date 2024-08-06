@@ -5,12 +5,13 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    language: {type: String, required: true},
-    country: {type: String, required: true}, 
-    city: {type: String, required: true},     
+    language: { type: String, required: true },
+    country: { type: String, required: true },
+    city: { type: String, required: true },
     userID: { type: Number, required: true, unique: true },
     userTypeID: { type: Number, required: true },
-    userType: { type: String, required: true }
+    userType: { type: String, required: true },
+    drivingLicense: { type: String, required: false } // Optional field for driving license
 }, { versionKey: false });
 
 module.exports = mongoose.model('User', UserSchema);

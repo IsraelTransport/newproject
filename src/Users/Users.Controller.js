@@ -80,7 +80,7 @@ async function listAllUsers(req, res) {
 }
 
 async function createUser(req, res) {
-    const { fullName, username, email, password, language, country, city, userTypeID } = req.body;
+    const { fullName, username, email, password, language, country, city, userTypeID, drivingLicense } = req.body;
 
     if (!fullName || !username || !email || !password || !language || !country || !city || userTypeID === undefined) {
         return res.status(400).send({ error: 'Full name, username, email, password, language, country, city, and user type are required' });
@@ -104,7 +104,8 @@ async function createUser(req, res) {
             city,
             userID,
             userTypeID,
-            userType: userTypeMap[userTypeID]
+            userType: userTypeMap[userTypeID],
+            drivingLicense: drivingLicense || null // Include drivingLicense if provided
         };
         await createUserInDB(user);
         res.status(201).send({ message: 'User created successfully' });
@@ -113,6 +114,7 @@ async function createUser(req, res) {
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
+
 
 
 
