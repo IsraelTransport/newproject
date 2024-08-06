@@ -132,7 +132,7 @@ async function deleteUser(req, res) {
 
 async function editUser(req, res) {
     const { userID } = req.params;
-    const { fullName, username, email, password, language, country, city, userTypeID, drivingLicense } = req.body;
+    const { fullName, username, email, password, language, country, city, userTypeID } = req.body;
 
     if (!fullName || !username || !email || !password || !language || !country || !city || userTypeID === undefined) {
         return res.status(400).send({ error: 'All fields are required' });
@@ -150,7 +150,7 @@ async function editUser(req, res) {
             city,
             userTypeID,
             userType: userTypeMap[userTypeID],
-            drivingLicense
+            
         };
         const result = await updateUserInDB(userID, updatedUser);
         if (result.modifiedCount > 0) {

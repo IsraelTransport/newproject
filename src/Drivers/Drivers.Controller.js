@@ -1,6 +1,7 @@
-const { getNextSequenceValue } = require('../counters.db');
-const { getDriversFromDB, getDriverByID, createDriverInDB, updateDriverInDB, deleteDriverFromDB } = require('./Drivers.db');
+const { getDriverByNameFromDB, getDriversFromDB, createDriverInDB, updateDriverInDB, deleteDriverFromDB, getDriverByIDFromDB } = require('./Drivers.db');
 const Driver = require('./Drivers.Model');
+const bcrypt = require('bcryptjs');
+const { getNextSequenceValue } = require('../counters.db');
 
 async function getDrivers(req, res) {
     try {
@@ -12,17 +13,32 @@ async function getDrivers(req, res) {
     }
 }
 
-async function getDriver(req, res) {
+async function getDriverByID(req, res) {
     const { id } = req.params;
     try {
-        const driver = await getDriverByID(id);
+        const driver = await getDriverByIDFromDB(id);
         if (driver) {
             res.status(200).send(driver);
         } else {
             res.status(404).send({ error: 'Driver not found' });
         }
     } catch (error) {
-        console.error('Error fetching driver:', error);
+        console.error('Error fetching driver by ID:', error);
+        res.status(500).send({ error: 'Internal server error' });
+    }
+}
+
+async function getDriverIDByName(req, res) {
+    const { name } = req.params;
+    try {
+        const driver = await getDriverByNameFromDB(name);
+        if (driver) {
+            res.status(200).send({ userID: driver.userID });
+        } else {
+            res.status(404).send({ error: 'Driver not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching driver by name:', error);
         res.status(500).send({ error: 'Internal server error' });
     }
 }
@@ -37,7 +53,18 @@ async function createDriver(req, res) {
     try {
         const userID = await getNextSequenceValue('Drivers');
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newDriver = new Driver({ fullName, username, email, password: hashedPassword, language, country, city, userID, drivingLicense, drivingLicenseExpiration });
+        const newDriver = new Driver({
+            fullName,
+            username,
+            email,
+            password: hashedPassword,
+            language,
+            country,
+            city,
+            userID,
+            drivingLicense,
+            drivingLicenseExpiration
+        });
         await createDriverInDB(newDriver);
         res.status(201).send({ message: 'Driver created successfully' });
     } catch (error) {
@@ -79,4 +106,4 @@ async function deleteDriver(req, res) {
     }
 }
 
-module.exports = { getDrivers, getDriver, createDriver, updateDriver, deleteDriver };
+module.exports = { getDrivers, getDriverByID, getDriverIDByName, createDriver, updateDriver, deleteDriver };

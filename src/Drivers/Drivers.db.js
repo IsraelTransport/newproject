@@ -19,7 +19,7 @@ async function getDriversFromDB(query = {}, projection = {}) {
     }
 }
 
-async function getDriverByID(id) {
+async function getDriverByIDFromDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
@@ -71,10 +71,26 @@ async function deleteDriverFromDB(id) {
     }
 }
 
+async function getDriverByNameFromDB(name) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        const driver = await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ fullName: name });
+        return driver;
+    } catch (error) {
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
+
+
+
 module.exports = {
     getDriversFromDB,
-    getDriverByID,
+    getDriverByIDFromDB,
     createDriverInDB,
     updateDriverInDB,
-    deleteDriverFromDB
+    deleteDriverFromDB,
+    getDriverByNameFromDB
 };
