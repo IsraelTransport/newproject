@@ -84,10 +84,25 @@ async function getDriverByNameFromDB(name) {
     }
 }
 
+async function getDriverByUsername(username) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        const database = mongo.db(DB_INFO.name);
+        const drivers = database.collection(DB_INFO.collection);
+        const driver = await drivers.findOne({ username });
+        return driver;
+    } catch (error) {
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
 
 
 module.exports = {
     getDriversFromDB,
+    getDriverByUsername,
     getDriverByIDFromDB,
     createDriverInDB,
     updateDriverInDB,

@@ -1,4 +1,4 @@
-const { getDriverByNameFromDB, getDriversFromDB, createDriverInDB, updateDriverInDB, deleteDriverFromDB, getDriverByIDFromDB } = require('./Drivers.db');
+const { getDriverByNameFromDB, getDriversFromDB, createDriverInDB, updateDriverInDB, getDriverByUsername, deleteDriverFromDB, getDriverByIDFromDB } = require('./Drivers.db');
 const Driver = require('./Drivers.Model');
 const bcrypt = require('bcryptjs');
 const { getNextSequenceValue } = require('../counters.db');
@@ -51,7 +51,13 @@ async function createDriver(req, res) {
     }
 
     try {
+        const existingDriver = await getDriverByUsername(username);
+        if (existingDriver) {
+            return res.status(400).send({ error: 'Enter another username, this username is already used.' });
+        }
+
         const userID = await getNextSequenceValue('Drivers');
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newDriver = new Driver({
             fullName,
@@ -65,30 +71,81 @@ async function createDriver(req, res) {
             drivingLicense,
             drivingLicenseExpiration
         });
+
         await createDriverInDB(newDriver);
         res.status(201).send({ message: 'Driver created successfully' });
     } catch (error) {
         console.error('Error creating driver:', error);
-        res.status(500).send({ error: 'Internal server error' });
+        res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
 
+
 async function updateDriver(req, res) {
     const { id } = req.params;
-    const driverData = req.body;
+    const { username, password } = req.body;
 
     try {
-        const result = await updateDriverInDB(id, driverData);
-        if (result.modifiedCount > 0) {
+        const existingDriver = await getDriverByIDFromDB(id);
+        if (!existingDriver) {
+            return res.status(404).send({ error: 'Driver not found' });
+        }
+
+        if (username && username !== existingDriver.username) {
+            const driverWithSameUsername = await getDriverByUsername(username);
+            if (driverWithSameUsername) {
+                return res.status(400).send({ error: 'Enter another username, this username is already used.' });
+            }
+        }
+
+        if (password) {
+            req.body.password = await bcrypt.hash(password, 10);
+        }
+
+        const updatedDriver = await updateDriverInDB(id, req.body);
+        if (updatedDriver.modifiedCount > 0) {
             res.status(200).send({ message: 'Driver updated successfully' });
         } else {
             res.status(404).send({ error: 'Driver not found' });
         }
     } catch (error) {
         console.error('Error updating driver:', error);
-        res.status(500).send({ error: 'Internal server error' });
+        res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
+
+
+async function checkDriverCredentials(req, res) {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).send({ error: 'Username and password are required' });
+    }
+
+    try {
+        const driver = await getDriverByUsername(username);
+        if (!driver) {
+            console.log('Driver not found');
+            return res.status(401).send({ error: 'Invalid username or password' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, driver.password);
+        if (!isPasswordValid) {
+            console.log('Invalid password');
+            return res.status(401).send({ error: 'Invalid username or password' });
+        }
+
+        const { userID, fullName, email, language, country, city, drivingLicense, drivingLicenseExpiration } = driver;
+        res.status(200).send({
+            message: 'Driver authenticated successfully',
+            driver: { userID, fullName, username, email, language, country, city, drivingLicense, drivingLicenseExpiration }
+        });
+    } catch (error) {
+        console.error('Error checking driver credentials:', error);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
+}
+
 
 async function deleteDriver(req, res) {
     const { id } = req.params;
@@ -106,4 +163,4 @@ async function deleteDriver(req, res) {
     }
 }
 
-module.exports = { getDrivers, getDriverByID, getDriverIDByName, createDriver, updateDriver, deleteDriver };
+module.exports = { getDrivers, getDriverByID, checkDriverCredentials, getDriverIDByName, createDriver, updateDriver, deleteDriver };

@@ -5,7 +5,6 @@ const {getNextSequenceValue} = require('../counters.db')
 const userTypeMap = {
     1: 'admin',
     2: 'client',
-    3: 'driver'
 };
 async function GetUserByID(req, res){
     const { userID } = req.params; 
@@ -83,7 +82,7 @@ async function createUser(req, res) {
     const { fullName, username, email, password, language, country, city, userTypeID } = req.body;
 
     if (!fullName || !username || !email || !password || !language || !country || !city || userTypeID === undefined) {
-        return res.status(400).send({ error: 'Full name, username, email, password, language, country, city, and user type are required' });
+        return res.status(400).send({ error: 'All fields are required' });
     }
 
     if (![1, 2, 3].includes(userTypeID)) {
@@ -91,10 +90,16 @@ async function createUser(req, res) {
     }
 
     try {
-        const userID = await getNextSequenceValue('Users'); 
+        // Check if username already exists
+        const existingUser = await getUserByUsername(username);
+        if (existingUser) {
+            return res.status(400).send({ error: 'Enter another username, this username is already used.' });
+        }
+
+        const userID = await getNextSequenceValue('Users');
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = {
+        const newUser = {
             fullName,
             username,
             email,
@@ -104,8 +109,10 @@ async function createUser(req, res) {
             city,
             userID,
             userTypeID,
+            userType: userTypeMap[userTypeID]
         };
-        await createUserInDB(user);
+
+        await createUserInDB(newUser);
         res.status(201).send({ message: 'User created successfully' });
     } catch (error) {
         console.error('Error creating user:', error);
@@ -139,6 +146,20 @@ async function editUser(req, res) {
     }
 
     try {
+        // Check if the user exists
+        const existingUser = await getUserByIDInDB(userID);
+        if (!existingUser) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+
+        // Check if the new username already exists in the database
+        if (username && username !== existingUser.username) {
+            const userWithSameUsername = await getUserByUsername(username);
+            if (userWithSameUsername) {
+                return res.status(400).send({ error: 'Enter another username, this username is already used.' });
+            }
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const updatedUser = {
             fullName,
@@ -150,8 +171,8 @@ async function editUser(req, res) {
             city,
             userTypeID,
             userType: userTypeMap[userTypeID],
-            
         };
+
         const result = await updateUserInDB(userID, updatedUser);
         if (result.modifiedCount > 0) {
             res.status(200).send({ message: 'User updated successfully' });
