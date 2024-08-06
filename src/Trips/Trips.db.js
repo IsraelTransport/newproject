@@ -46,6 +46,19 @@ async function createTripInDB(tripData) {
     }
 }
 
+async function getTripIDByNameFromDB(name) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ TripName: name });
+    } catch (error) {
+        console.error('Error fetching trip by name:', error);
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
+
 async function updateTripInDB(id, tripData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
@@ -77,5 +90,6 @@ module.exports = {
     getTripByID,
     createTripInDB,
     updateTripInDB,
-    deleteTripFromDB
+    deleteTripFromDB,
+    getTripIDByNameFromDB
 };

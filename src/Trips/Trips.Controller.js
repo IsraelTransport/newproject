@@ -1,5 +1,5 @@
 const { getNextSequenceValue } = require('../counters.db');
-const { createTripInDB, getTripsFromDB, getTripByID, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
+const { createTripInDB, getTripsFromDB, getTripIDByNameFromDB, getTripByID, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
 
 async function getTrips(req, res) {
@@ -45,7 +45,20 @@ async function createTrip(req, res) {
     }
 }
 
-
+async function getTripIDByName(req, res) {
+    const { name } = req.params;
+    try {
+        const trip = await getTripIDByNameFromDB(name);
+        if (trip) {
+            res.status(200).send(trip);
+        } else {
+            res.status(404).send({ error: 'Trip not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching trip by name:', error);
+        res.status(500).send({ error: 'Internal server error' });
+    }
+}
 
 async function updateTrip(req, res) {
     const { id } = req.params;
@@ -78,4 +91,4 @@ async function deleteTrip(req, res) {
     }
 }
 
-module.exports = { getTrips, getTrip, createTrip, updateTrip, deleteTrip };
+module.exports = { getTrips, getTrip, getTripIDByName, createTrip, updateTrip, deleteTrip };
