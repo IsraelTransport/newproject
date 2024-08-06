@@ -79,7 +79,7 @@ async function deleteTripFromDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).deleteOne({ BookingID: parseInt(id) });
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).deleteOne({ TripID: parseInt(id) });
     } catch (error) {
         console.error('Error deleting trip:', error);
         throw error;
