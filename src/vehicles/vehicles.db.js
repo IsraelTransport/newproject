@@ -25,7 +25,7 @@ async function getVehicleByID(id) {
         await mongo.connect();
         return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ VehicleID: parseInt(id) });
     } catch (error) {
-        console.error('Error fetching vehicle:', error);
+        console.error('Error fetching vehicle by ID:', error);
         throw error;
     } finally {
         await mongo.close();
@@ -49,7 +49,11 @@ async function updateVehicleInDB(id, vehicleData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ VehicleID: parseInt(id) }, { $set: vehicleData });
+
+        // Exclude the _id field from the update
+        const { _id, ...dataToUpdate } = vehicleData;
+
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ VehicleID: parseInt(id) }, { $set: dataToUpdate });
     } catch (error) {
         console.error('Error updating vehicle:', error);
         throw error;
