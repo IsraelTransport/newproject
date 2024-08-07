@@ -84,11 +84,24 @@ async function updateUserInDB(userID, updatedUser) {
     }
 }
 
+async function updateUserEmailInDB(userID, email) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ userID: parseInt(userID) }, { $set: { email: email } });
+    } catch (error) {
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
+
 module.exports = {
     getUsersFromDB,
     getUserByUsername,
     createUserInDB,
     getUserByIDInDB,
     deleteUserFromDB,
-    updateUserInDB
+    updateUserInDB,
+    updateUserEmailInDB
 };

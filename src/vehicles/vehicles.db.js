@@ -49,8 +49,6 @@ async function updateVehicleInDB(id, vehicleData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-
-        // Exclude the _id field from the update
         const { _id, ...dataToUpdate } = vehicleData;
 
         return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne({ VehicleID: parseInt(id) }, { $set: dataToUpdate });

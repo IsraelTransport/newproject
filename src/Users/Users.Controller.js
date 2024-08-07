@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { getUserByUsername, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
+const { getUserByUsername,updateUserEmailInDB, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
 const {getNextSequenceValue} = require('../counters.db')
 const userTypeMap = {
@@ -120,6 +120,32 @@ async function createUser(req, res) {
     }
 }
 
+async function patchUserEmail(req, res) {
+    const { userID } = req.params;
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).send({ error: 'Email is required' });
+    }
+
+    try {
+        // Check if email already exists
+        const existingUser = await getUserByUsername(email);
+        if (existingUser) {
+            return res.status(400).send({ error: 'Enter another email, this email is already used.' });
+        }
+
+        const result = await updateUserEmailInDB(userID, email);
+        if (result.modifiedCount > 0) {
+            res.status(200).send({ message: 'User email updated successfully' });
+        } else {
+            res.status(404).send({ error: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error updating user email:', error);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
+}
 
 async function deleteUser(req, res) {
     const { userID } = req.params;
@@ -185,4 +211,4 @@ async function editUser(req, res) {
     }
 }
 
-module.exports = { checkUserCredentials, getUserIDByUsername, editUser ,deleteUser, listAllUsers, createUser, GetUserByID };
+module.exports = { checkUserCredentials, patchUserEmail, getUserIDByUsername, editUser ,deleteUser, listAllUsers, createUser, GetUserByID };
