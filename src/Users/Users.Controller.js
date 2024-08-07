@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { getUserByUsername,updateUserEmailInDB, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
+const { getUserByUsername,updateUserEmailInDB, getUserByEmail, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
 const {getNextSequenceValue} = require('../counters.db')
 const userTypeMap = {
@@ -85,20 +85,30 @@ async function createUser(req, res) {
         return res.status(400).send({ error: 'All fields are required' });
     }
 
-    if (![1, 2, 3].includes(userTypeID)) {
-        return res.status(400).send({ error: 'User type must be 1, 2, or 3' });
+    if (![1, 2].includes(userTypeID)) {
+        return res.status(400).send({ error: 'User type must be 1 or 2' });
     }
 
     try {
         // Check if username already exists
-        const existingUser = await getUserByUsername(username);
-        if (existingUser) {
+        const existingUserByUsername = await getUserByUsername(username);
+        if (existingUserByUsername) {
             return res.status(400).send({ error: 'Enter another username, this username is already used.' });
         }
 
+        // Check if email already exists
+        const existingUserByEmail = await getUserByEmail(email);
+        if (existingUserByEmail) {
+            return res.status(400).send({ error: 'Enter another email, this email is already used.' });
+        }
+
+        // Get the next sequence value for UserID
         const userID = await getNextSequenceValue('Users');
 
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create the new user object
         const newUser = {
             fullName,
             username,
@@ -107,7 +117,7 @@ async function createUser(req, res) {
             language,
             country,
             city,
-            userID,
+            userID,  // Use the auto-incremented UserID
             userTypeID,
             userType: userTypeMap[userTypeID]
         };
@@ -120,6 +130,7 @@ async function createUser(req, res) {
     }
 }
 
+
 async function patchUserEmail(req, res) {
     const { userID } = req.params;
     const { email } = req.body;
@@ -129,23 +140,24 @@ async function patchUserEmail(req, res) {
     }
 
     try {
-        // Check if email already exists
-        const existingUser = await getUserByUsername(email);
-        if (existingUser) {
+        // Check if the new email already exists in the database
+        const userWithSameEmail = await getUserByEmail(email);
+        if (userWithSameEmail) {
             return res.status(400).send({ error: 'Enter another email, this email is already used.' });
         }
 
-        const result = await updateUserEmailInDB(userID, email);
+        const result = await updateUserEmailInDB(userID, { email });
         if (result.modifiedCount > 0) {
-            res.status(200).send({ message: 'User email updated successfully' });
+            res.status(200).send({ message: 'Email updated successfully' });
         } else {
             res.status(404).send({ error: 'User not found' });
         }
     } catch (error) {
-        console.error('Error updating user email:', error);
+        console.error('Error updating email:', error);
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
+
 
 async function deleteUser(req, res) {
     const { userID } = req.params;

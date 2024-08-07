@@ -83,6 +83,20 @@ async function updateUserInDB(userID, updatedUser) {
         await mongo.close();
     }
 }
+async function getUserByEmail(email) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        const database = mongo.db(DB_INFO.name);
+        const users = database.collection(DB_INFO.collection);
+        const user = await users.findOne({ email });
+        return user;
+    } catch (error) {
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
 
 async function updateUserEmailInDB(userID, email) {
     let mongo = new MongoClient(DB_INFO.uri);
@@ -103,5 +117,6 @@ module.exports = {
     getUserByIDInDB,
     deleteUserFromDB,
     updateUserInDB,
-    updateUserEmailInDB
+    updateUserEmailInDB,
+    getUserByEmail
 };
