@@ -6,7 +6,7 @@ const {
     deleteVehicleFromDB 
 } = require('./vehicles.db');
 const Vehicle = require('./vehicles.model');
-const {getNextSequenceValue} = require('../counters.db')
+const {getNextSequenceValue} = require('../../Counter/counters.db')
 async function getVehicles(req, res) {
     try {
         const vehicles = await getVehiclesFromDB();
@@ -39,7 +39,7 @@ async function createVehicle(req, res) {
     }
 
     try {
-        const VehicleID = await getNextSequenceValue('Vehicles'); // Get next sequence value
+        const VehicleID = await getNextSequenceValue('Vehicles'); 
         const newVehicle = new Vehicle({ VehicleID, Make, Model, Year, Km, vehicleType, carPlateNumber });
         await createVehicleInDB(newVehicle);
         res.status(201).send({ message: 'Vehicle created successfully' });

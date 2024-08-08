@@ -1,4 +1,4 @@
-const { getNextSequenceValue } = require('../counters.db');
+const { getNextSequenceValue } = require('../../Counter/counters.db');
 const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
 
@@ -15,7 +15,7 @@ async function getTrips(req, res) {
 async function getTrip(req, res) {
     const { id } = req.params;
     try {
-        const trip = await getTripByID(id);
+        const trip = await getTripByIDFromDB(id);
         if (trip) {
             res.status(200).send(trip);
         } else {
@@ -34,17 +34,14 @@ async function createTrip(req, res) {
         return res.status(400).send({ error: 'TripName, TripType, and Description are required' });
     }
 
-    // Initialize OpenHour and CloseHour if not provided
     OpenHour = OpenHour || [];
     CloseHour = CloseHour || [];
 
-    // If no days are provided, set all days to open 24 hours
     if (OpenHour.length === 0 && CloseHour.length === 0) {
         OpenHour = Array(7).fill("00:00");
         CloseHour = Array(7).fill("23:59");
 
     } else if (OpenHour.length < 7) {
-        // If some days are provided but not all 7, set the remaining days as closed
         OpenHour = OpenHour.concat(Array(7 - OpenHour.length).fill("Closed"));
         CloseHour = CloseHour.concat(Array(7 - CloseHour.length).fill("Closed"));
     }
@@ -90,12 +87,10 @@ async function updateTrip(req, res) {
             return res.status(404).send({ error: 'Trip not found' });
         }
 
-        // Check if no days are provided
         if (OpenHour.length === 0 && CloseHour.length === 0) {
             OpenHour = Array(7).fill("00:00");
             CloseHour = Array(7).fill("23:59");
         } else if (OpenHour.length < 7 || CloseHour.length < 7) {
-            // Fill remaining days with "Closed"
             OpenHour = OpenHour.concat(Array(7 - OpenHour.length).fill("Closed"));
             CloseHour = CloseHour.concat(Array(7 - CloseHour.length).fill("Closed"));
         }

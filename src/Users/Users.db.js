@@ -11,7 +11,7 @@ async function getUserByIDInDB(userID) {
         await mongo.connect();
         const database = mongo.db(DB_INFO.name);
         const users = database.collection(DB_INFO.collection);
-        const user = await users.findOne({ userID: parseInt(userID) }); // Ensure userID is parsed as an integer
+        const user = await users.findOne({ userID: parseInt(userID) }); 
         return user;
     } catch (error) {
         throw error;
@@ -97,6 +97,7 @@ async function getUserByEmail(email) {
         await mongo.close();
     }
 }
+
 
 async function updateUserEmailInDB(userID, email) {
     let mongo = new MongoClient(DB_INFO.uri);

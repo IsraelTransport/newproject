@@ -5,7 +5,7 @@ const {
     updateBookingTypeInDB, 
     deleteBookingTypeFromDB 
 } = require('./BookingTypes.db');
-const { getNextSequenceValue } = require('../counters.db');
+const { getNextSequenceValue } = require('../../Counter/counters.db');
 
 async function getBookingTypes(req, res) {
     try {

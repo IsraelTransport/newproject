@@ -1,13 +1,10 @@
-const { 
-    getVehicleServicesFromDB, 
-    getVehicleServiceByID, 
-    createVehicleServiceInDB, 
-    updateVehicleServiceInDB, 
-    deleteVehicleServiceFromDB 
-} = require('./VehiclesServices.db');
-const VehicleService = require('./VehiclesServices.Model');
+const { getVehicleServicesFromDB, getVehicleServiceByID, createVehicleServiceInDB, updateVehicleServiceInDB, deleteVehicleServiceFromDB } = require('./Vehicles.db');
+const VehicleService = require('./Vehicles.Model');
 const Vehicle = require('../vehicles/vehicles.model');
-const {getNextSequenceValue} = require('../counters.db')
+const {getNextSequenceValue} = require('../../Counter/counters.db')
+
+
+
 async function getVehicleServices(req, res) {
     try {
         const services = await getVehicleServicesFromDB();
@@ -34,18 +31,12 @@ async function getVehicleService(req, res) {
 }
 
 async function createVehicleService(req, res) {
-    const { VehicleID, serviceType, serviceDate, km } = req.body; // Removed ServiceID from req.body
+    const { VehicleID, serviceType, serviceDate, km } = req.body; 
     if (!VehicleID || !serviceType || !serviceDate || !km) {
         return res.status(400).send({ error: 'All service details are required' });
     }
-
     try {
-        const ServiceID = await getNextSequenceValue('VehicleServices'); // Get next sequence value
-        const vehicle = await Vehicle.findOne({ VehicleID });
-        if (!vehicle) {
-            return res.status(400).send({ error: 'Vehicle not found' });
-        }
-
+        const ServiceID = await getNextSequenceValue('VehicleServices'); 
         const newService = new VehicleService({ ServiceID, VehicleID, serviceType, serviceDate, km });
         await createVehicleServiceInDB(newService);
         res.status(201).send({ message: 'Vehicle service created successfully' });

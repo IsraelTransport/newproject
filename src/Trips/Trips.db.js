@@ -37,7 +37,7 @@ async function createTripInDB(tripData) {
         await mongo.connect();
         const result = await mongo.db(DB_INFO.name).collection(DB_INFO.collection).insertOne(tripData);
         console.log('Trip created:', result);
-        return result.insertedId; // Return the ID of the created trip document
+        return result.insertedId; 
     } catch (error) {
         console.error('Error creating trip:', error);
         throw error;

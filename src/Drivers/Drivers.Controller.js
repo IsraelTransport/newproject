@@ -1,7 +1,7 @@
-const { getDriverByNameFromDB, getDriversFromDB, createDriverInDB, updateDriverInDB, getDriverByUsername, deleteDriverFromDB, getDriverByIDFromDB } = require('./Drivers.db');
+const { getDriverByNameFromDB, getDriversFromDB, getDriverByEmail, createDriverInDB, updateDriverInDB, getDriverByUsername, deleteDriverFromDB, getDriverByIDFromDB } = require('./Drivers.db');
 const Driver = require('./Drivers.Model');
 const bcrypt = require('bcryptjs');
-const { getNextSequenceValue } = require('../counters.db');
+const { getNextSequenceValue } = require('../../Counter/counters.db');
 
 async function getDrivers(req, res) {
     try {
@@ -51,9 +51,14 @@ async function createDriver(req, res) {
     }
 
     try {
-        const existingDriver = await getDriverByUsername(username);
-        if (existingDriver) {
+        const existingDriverByUsername = await getDriverByUsername(username);
+        if (existingDriverByUsername) {
             return res.status(400).send({ error: 'Enter another username, this username is already used.' });
+        }
+
+        const existingDriverByEmail = await getDriverByEmail(email);
+        if (existingDriverByEmail) {
+            return res.status(400).send({ error: 'Enter another email, this email is already used.' });
         }
 
         const userID = await getNextSequenceValue('Drivers');
@@ -81,9 +86,10 @@ async function createDriver(req, res) {
 }
 
 
+
 async function updateDriver(req, res) {
     const { id } = req.params;
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
 
     try {
         const existingDriver = await getDriverByIDFromDB(id);
@@ -95,6 +101,13 @@ async function updateDriver(req, res) {
             const driverWithSameUsername = await getDriverByUsername(username);
             if (driverWithSameUsername) {
                 return res.status(400).send({ error: 'Enter another username, this username is already used.' });
+            }
+        }
+
+        if (email && email !== existingDriver.email) {
+            const driverWithSameEmail = await getDriverByEmail(email);
+            if (driverWithSameEmail) {
+                return res.status(400).send({ error: 'Enter another email, this email is already used.' });
             }
         }
 
@@ -113,6 +126,7 @@ async function updateDriver(req, res) {
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
+
 
 
 async function checkDriverCredentials(req, res) {

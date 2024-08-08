@@ -1,6 +1,6 @@
 const { getReportsFromDB, createReportInDB, deleteReportFromDB, updateReportInDB, getReportByIDFromDB } = require('./Report.db');
 const Report = require('./Report.Model');
-const { getNextSequenceValue } = require('../counters.db');
+const { getNextSequenceValue } = require('../../Counter/counters.db');
 
 async function getReports(req, res) {
     try {
@@ -40,7 +40,7 @@ async function createReport(req, res) {
             ReportID: reportID,
             UserID,
             Message,
-            Status: 'Pending' // Default value
+            Status: 'Pending' 
         });
         await createReportInDB(newReport);
         res.status(201).send({ message: 'Report created successfully' });

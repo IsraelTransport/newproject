@@ -1,5 +1,5 @@
 const { MongoClient } = require('mongodb');
-const { getNextSequenceValue } = require('../counters.db'); // Ensure this import is present
+const { getNextSequenceValue } = require('../../Counter/counters.db'); 
 
 const DB_INFO = {
     uri: process.env.CONNECTION_STRING,
@@ -12,7 +12,7 @@ async function getBookingTypesFromDB(query = {}, projection = {}) {
     try {
         await mongo.connect();
         const bookingTypes = await mongo.db(DB_INFO.name).collection(DB_INFO.collection).find(query, { projection }).toArray();
-        console.log('Booking Types:', bookingTypes); // Add this line for debugging
+        console.log('Booking Types:', bookingTypes); 
         return bookingTypes;
     } catch (error) {
         console.error('Error fetching booking types:', error);

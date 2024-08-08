@@ -1,4 +1,4 @@
-const { getNextSequenceValue } = require('../counters.db');
+const { getNextSequenceValue } = require('../../Counter/counters.db');
 const { createBookingInDB, getBookingsFromDB, getBookingByIDInDB, updateBookingInDB, deleteBookingFromDB } = require('./Bookings.db');
 const Booking = require('./Bookings.Model');
 
@@ -64,54 +64,32 @@ async function createBooking(req, res) {
 
 async function updateBooking(req, res) {
     const { id } = req.params;
-    const { 
-        UserID, 
-        VehicleID, 
-        status, 
-        DepartureTime, 
-        Passengers, 
-        PickupAddress, 
-        DropOffAddress, 
-        FullName, 
-        Email, 
-        PhoneNumber, 
-        startTrailDate, 
-        endTrailDate, 
-        stopStations, 
-        notes 
-    } = req.body;
+    const updateData = req.body;
 
     try {
-        const updatedBooking = await updateBookingInDB(id, { 
-            UserID, 
-            VehicleID, 
-            status, 
-            DepartureTime, 
-            Passengers, 
-            PickupAddress, 
-            DropOffAddress, 
-            FullName, 
-            Email, 
-            PhoneNumber, 
-            startTrailDate, 
-            endTrailDate, 
-            stopStations, 
-            notes 
-        });
+        const existingBooking = await getBookingByIDInDB(id);
+        if (!existingBooking) {
+            return res.status(404).send({ error: 'Booking not found' });
+        }
 
-        if (updatedBooking.modifiedCount > 0) {
+        const updatedBooking = { 
+            ...existingBooking._doc,  
+            ...updateData,
+            BookingID: existingBooking.BookingID,
+            _id: existingBooking._id
+        };
+
+        const result = await updateBookingInDB(id, updatedBooking);
+        if (result.modifiedCount > 0) {
             res.status(200).send({ message: 'Booking updated successfully' });
         } else {
             res.status(404).send({ error: 'Booking not found' });
         }
     } catch (error) {
         console.error('Error updating booking:', error);
-        res.status(500).send({ error: 'Internal server error' });
+        res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
-
-module.exports = { updateBooking };
-
 
 async function deleteBooking(req, res) {
     const { id } = req.params;

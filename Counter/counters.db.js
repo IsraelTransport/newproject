@@ -9,12 +9,17 @@ async function getNextSequenceValue(collectionName) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        const collection = mongo.db(DB_INFO.name).collection(collectionName);
-        const count = await collection.countDocuments();
-        console.log(`Collection ${collectionName} has ${count} documents.`);
-        return count + 1;
+        const database = mongo.db(DB_INFO.name);
+        const collection = database.collection(collectionName);
+        
+        const lastDocument = await collection.find().sort({ userID: -1 }).limit(1).toArray();
+        
+        if (lastDocument.length === 0) {
+            return 1;  
+        } else {
+            return lastDocument[0].userID + 1;  
+        }
     } catch (error) {
-        console.error(`Error getting next sequence value for ${collectionName}:`, error);
         throw error;
     } finally {
         await mongo.close();

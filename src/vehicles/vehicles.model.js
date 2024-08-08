@@ -7,7 +7,7 @@ const VehicleSchema = new mongoose.Schema({
     Year: { type: Number, required: true },
     Km: { type: Number, required: true },
     vehicleType: { type: String, required: true },
-    carPlateNumber: { type: String, required: true } // Added car plate number
+    carPlateNumber: { type: String, required: true } 
 }, { versionKey: false });
 
 module.exports = mongoose.model('Vehicle', VehicleSchema);

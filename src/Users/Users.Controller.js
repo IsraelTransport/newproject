@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { getUserByUsername,updateUserEmailInDB, getUserByEmail, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
-const {getNextSequenceValue} = require('../counters.db')
+const {getNextSequenceValue} = require('../../Counter/counters.db')
 const userTypeMap = {
     1: 'admin',
     2: 'client',
@@ -90,25 +90,20 @@ async function createUser(req, res) {
     }
 
     try {
-        // Check if username already exists
         const existingUserByUsername = await getUserByUsername(username);
         if (existingUserByUsername) {
             return res.status(400).send({ error: 'Enter another username, this username is already used.' });
         }
 
-        // Check if email already exists
         const existingUserByEmail = await getUserByEmail(email);
         if (existingUserByEmail) {
             return res.status(400).send({ error: 'Enter another email, this email is already used.' });
         }
 
-        // Get the next sequence value for UserID
         const userID = await getNextSequenceValue('Users');
 
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create the new user object
         const newUser = {
             fullName,
             username,
@@ -117,7 +112,7 @@ async function createUser(req, res) {
             language,
             country,
             city,
-            userID,  // Use the auto-incremented UserID
+            userID,  
             userTypeID,
             userType: userTypeMap[userTypeID]
         };
@@ -140,7 +135,6 @@ async function patchUserEmail(req, res) {
     }
 
     try {
-        // Check if the new email already exists in the database
         const userWithSameEmail = await getUserByEmail(email);
         if (userWithSameEmail) {
             return res.status(400).send({ error: 'Enter another email, this email is already used.' });
@@ -184,20 +178,17 @@ async function editUser(req, res) {
     }
 
     try {
-        // Check if the user exists
-        const existingUser = await getUserByIDInDB(userID);
-        if (!existingUser) {
-            return res.status(404).send({ error: 'User not found' });
-        }
 
-        // Check if the new username already exists in the database
-        if (username && username !== existingUser.username) {
-            const userWithSameUsername = await getUserByUsername(username);
-            if (userWithSameUsername) {
-                return res.status(400).send({ error: 'Enter another username, this username is already used.' });
-            }
+        const userWithSameUsername = await getUserByUsername(username);
+        if (userWithSameUsername) {
+            return res.status(400).send({ error: 'Enter another username, this username is already used.' });
         }
-
+        
+        
+        const existingUserByEmail = await getUserByEmail(email);
+        if (existingUserByEmail) {
+            return res.status(400).send({ error: 'Enter another email, this email is already used.' });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         const updatedUser = {
             fullName,
