@@ -1,6 +1,6 @@
 const { getReportsFromDB, createReportInDB, deleteReportFromDB, updateReportInDB, getReportByIDFromDB } = require('./Report.db');
 const Report = require('./Report.Model');
-const { getNextSequenceValue } = require('../../Counter/counters.db');
+const { getNextSequenceValue } = require('../Counters/CounterService');
 
 async function getReports(req, res) {
     try {

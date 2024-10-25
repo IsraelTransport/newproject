@@ -1,7 +1,7 @@
 const { getDriverByNameFromDB, getDriversFromDB, getDriverByEmail, createDriverInDB, updateDriverInDB, getDriverByUsername, deleteDriverFromDB, getDriverByIDFromDB } = require('./Drivers.db');
 const Driver = require('./Drivers.Model');
 const bcrypt = require('bcryptjs');
-const { getNextSequenceValue } = require('../../Counter/counters.db');
+const { getNextSequenceValue } = require('../Counters/CounterService');
 
 async function getDrivers(req, res) {
     try {

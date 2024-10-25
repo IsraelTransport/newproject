@@ -1,4 +1,4 @@
-const { getNextSequenceValue } = require('../../Counter/counters.db');
+const { getNextSequenceValue } = require('../Counters/CounterService');
 const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
 

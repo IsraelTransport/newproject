@@ -1,6 +1,7 @@
-const { getNextSequenceValue } = require('../../Counter/counters.db');
+const { getNextSequenceValue } = require('../Counters/CounterService');
 const { createBookingInDB, getBookingsFromDB, getBookingByIDInDB, updateBookingInDB, deleteBookingFromDB } = require('./Bookings.db');
 const Booking = require('./Bookings.Model');
+const { sendEmail } = require('../EmailVerifying/email'); // Generalized email sending function
 
 async function getBookings(req, res) {
     try {
@@ -72,16 +73,30 @@ async function updateBooking(req, res) {
             return res.status(404).send({ error: 'Booking not found' });
         }
 
+        const isStatusChanged = existingBooking.status !== updateData.status;
         const updatedBooking = { 
-            ...existingBooking._doc,  
+            ...existingBooking._doc,
             ...updateData,
             BookingID: existingBooking.BookingID,
             _id: existingBooking._id
         };
 
         const result = await updateBookingInDB(id, updatedBooking);
+        
         if (result.modifiedCount > 0) {
             res.status(200).send({ message: 'Booking updated successfully' });
+
+            // Check if status is "Confirmed" or "Cancelled" and send email if status changed
+            if (isStatusChanged && (updateData.status === 'Confirmed' || updateData.status === 'Cancelled')) {
+                const emailSubject = `Booking ${updateData.status}`;
+                const emailBody = `
+                    <p>Dear ${existingBooking.FullName},</p>
+                    <p>Your booking  has been ${updateData.status.toLowerCase()}.</p>
+                    <p>Thank you for using our service!</p>
+                `;
+                
+                await sendEmail(existingBooking.Email, emailSubject, emailBody);
+            }
         } else {
             res.status(404).send({ error: 'Booking not found' });
         }
@@ -90,7 +105,6 @@ async function updateBooking(req, res) {
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
-
 async function deleteBooking(req, res) {
     const { id } = req.params;
 

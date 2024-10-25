@@ -1,5 +1,4 @@
 const { MongoClient } = require('mongodb');
-const { getNextSequenceValue } = require('../../Counter/counters.db'); 
 
 const DB_INFO = {
     uri: process.env.CONNECTION_STRING,
@@ -41,12 +40,7 @@ async function createBookingTypeInDB(bookingTypeData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        bookingTypeData.BookingTypeID = await getNextSequenceValue('BookingTypes');
-        console.log(`Creating booking type with BookingTypeID: ${bookingTypeData.BookingTypeID}`);
-        const result = await mongo.db(DB_INFO.name).collection(DB_INFO.collection).insertOne(bookingTypeData);
-        const count = await mongo.db(DB_INFO.name).collection(DB_INFO.collection).countDocuments();
-        console.log(`Collection BookingTypes now has ${count} documents.`);
-        return result;
+        await mongo.db(DB_INFO.name).collection(DB_INFO.collection).insertOne(bookingTypeData);
     } catch (error) {
         console.error('Error creating booking type:', error);
         throw error;

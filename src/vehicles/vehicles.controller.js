@@ -6,7 +6,7 @@ const {
     deleteVehicleFromDB 
 } = require('./vehicles.db');
 const Vehicle = require('./vehicles.model');
-const {getNextSequenceValue} = require('../../Counter/counters.db')
+const { getNextSequenceValue } = require('../Counters/CounterService');
 async function getVehicles(req, res) {
     try {
         const vehicles = await getVehiclesFromDB();

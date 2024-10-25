@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { getUserByUsername,updateUserEmailInDB, getUserByEmail, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
-const {getNextSequenceValue} = require('../../Counter/counters.db')
+const { sendVerificationEmail } = require('../EmailVerifying/email'); // Import email sending function
+const { getNextSequenceValue } = require('../Counters/CounterService');
 const userTypeMap = {
     1: 'admin',
     2: 'client',
@@ -92,17 +94,17 @@ async function createUser(req, res) {
     try {
         const existingUserByUsername = await getUserByUsername(username);
         if (existingUserByUsername) {
-            return res.status(400).send({ error: 'Enter another username, this username is already used.' });
+            return res.status(400).send({ error: 'Username is already in use' });
         }
 
         const existingUserByEmail = await getUserByEmail(email);
         if (existingUserByEmail) {
-            return res.status(400).send({ error: 'Enter another email, this email is already used.' });
+            return res.status(400).send({ error: 'Email is already in use' });
         }
 
         const userID = await getNextSequenceValue('Users');
-
         const hashedPassword = await bcrypt.hash(password, 10);
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit code
 
         const newUser = {
             fullName,
@@ -112,13 +114,19 @@ async function createUser(req, res) {
             language,
             country,
             city,
-            userID,  
+            userID,
             userTypeID,
-            userType: userTypeMap[userTypeID]
+            userType: userTypeID === 1 ? 'admin' : 'client',
+            verified: false,
+            verificationCode // Add the verification code to the user document
         };
 
         await createUserInDB(newUser);
-        res.status(201).send({ message: 'User created successfully' });
+
+        // Send verification code by email
+        await sendVerificationEmail(newUser.email, verificationCode);
+
+        res.status(201).send({ message: 'User created successfully. Please enter the code sent to your email to verify your account.' });
     } catch (error) {
         console.error('Error creating user:', error);
         res.status(500).send({ error: 'Internal server error', details: error.message });
@@ -214,4 +222,31 @@ async function editUser(req, res) {
     }
 }
 
-module.exports = { checkUserCredentials, patchUserEmail, getUserIDByUsername, editUser ,deleteUser, listAllUsers, createUser, GetUserByID };
+async function verifyUser(req, res) {
+    const { email, verificationCode } = req.body;
+
+    try {
+        const user = await getUserByEmail(email);
+        if (!user) {
+            return res.status(404).send({ error: 'User not found.' });
+        }
+        if (user.verified) {
+            return res.status(400).send({ error: 'User is already verified.' });
+        }
+        if (user.verificationCode !== verificationCode) {
+            return res.status(400).send({ error: 'Invalid verification code.' });
+        }
+
+        // Set user as verified
+        await updateUserInDB(user.userID, { verified: true, verificationCode: null });
+        res.status(200).send({ message: 'Email verified successfully.' });
+    } catch (error) {
+        console.error('Error verifying user:', error);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
+}
+
+
+
+
+module.exports = { checkUserCredentials,verifyUser, patchUserEmail, getUserIDByUsername, editUser ,deleteUser, listAllUsers, createUser, GetUserByID };

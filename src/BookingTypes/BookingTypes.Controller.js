@@ -5,7 +5,8 @@ const {
     updateBookingTypeInDB, 
     deleteBookingTypeFromDB 
 } = require('./BookingTypes.db');
-const { getNextSequenceValue } = require('../../Counter/counters.db');
+const { getNextSequenceValue } = require('../Counters/CounterService');
+const BookingType = require('./BookingTypes.Model');
 
 async function getBookingTypes(req, res) {
     try {
@@ -34,12 +35,30 @@ async function getBookingType(req, res) {
 
 
 async function createBookingType(req, res) {
-    const bookingTypeData = req.body;
+    const { TypeName } = req.body;
+
+    if (!TypeName) {
+        return res.status(400).send({ error: 'TypeName is required' });
+    }
+
     try {
-        bookingTypeData.BookingTypeID = await getNextSequenceValue('BookingTypes');
-        console.log(`Creating booking type with BookingTypeID: ${bookingTypeData.BookingTypeID}`);
-        await createBookingTypeInDB(bookingTypeData);
-        res.status(201).send({ message: 'Booking type created successfully' });
+        // Get the next BookingTypeID from the Counters collection
+        const bookingTypeID = await getNextSequenceValue('BookingTypes');
+
+        // Prepare the data to be inserted
+        const bookingTypeData = {
+            BookingTypeID: bookingTypeID,
+            TypeName
+        };
+
+        // Insert the data into the database
+        const newBookingType = await createBookingTypeInDB(bookingTypeData);
+
+        // Return the response
+        res.status(201).send({
+            message: 'Booking type created successfully',
+            newBookingType
+        });
     } catch (error) {
         console.error('Error creating booking type:', error.message);
         res.status(500).send({ error: 'Internal server error', details: error.message });

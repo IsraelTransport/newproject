@@ -1,7 +1,7 @@
 const { getVehicleServicesFromDB, getVehicleServiceByID, createVehicleServiceInDB, updateVehicleServiceInDB, deleteVehicleServiceFromDB } = require('./Vehicles.db');
 const VehicleService = require('./Vehicles.Model');
 const Vehicle = require('../vehicles/vehicles.model');
-const {getNextSequenceValue} = require('../../Counter/counters.db')
+const { getNextSequenceValue } = require('../Counters/CounterService');
 
 
 
