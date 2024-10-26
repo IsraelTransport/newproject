@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb');
+const Driver = require('./Drivers.Model'); // Adjust the path if needed
 
 const DB_INFO = {
     uri: process.env.CONNECTION_STRING,
@@ -26,6 +27,21 @@ async function getDriverByIDFromDB(id) {
         return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ userID: parseInt(id) });
     } catch (error) {
         console.error('Error fetching driver by ID:', error);
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
+
+async function getDriverNameByIDFromDB(id) {
+    let mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        // Fetch only the fullName field based on userID
+        const driver = await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ userID: parseInt(id) }, { projection: { fullName: 1, _id: 0 } });
+        return driver;
+    } catch (error) {
+        console.error('Error fetching driver name by ID from DB:', error);
         throw error;
     } finally {
         await mongo.close();
@@ -123,5 +139,6 @@ module.exports = {
     updateDriverInDB,
     deleteDriverFromDB,
     getDriverByNameFromDB,
-    getDriverByEmail
+    getDriverByEmail,
+    getDriverNameByIDFromDB
 };

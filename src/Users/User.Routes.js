@@ -10,7 +10,7 @@ router.get('/GetUserIDByUsername/:username', getUserIDByUsername);
 router.delete('/DeleteUser/:userID', deleteUser);
 router.put('/EditUser/:userID', editUser); 
 router.patch('/PatchUserEmail/:userID', patchUserEmail);
-router.post('/verify-code', verifyUser); // POST request for code-based verification
+router.post('/verify-code', verifyUser); 
 
 
 module.exports = router;

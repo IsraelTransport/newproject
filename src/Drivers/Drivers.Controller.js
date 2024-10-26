@@ -1,4 +1,4 @@
-const { getDriverByNameFromDB, getDriversFromDB, getDriverByEmail, createDriverInDB, updateDriverInDB, getDriverByUsername, deleteDriverFromDB, getDriverByIDFromDB } = require('./Drivers.db');
+const { getDriverByNameFromDB, getDriversFromDB,getDriverNameByIDFromDB ,getDriverByEmail, createDriverInDB, updateDriverInDB, getDriverByUsername, deleteDriverFromDB, getDriverByIDFromDB } = require('./Drivers.db');
 const Driver = require('./Drivers.Model');
 const bcrypt = require('bcryptjs');
 const { getNextSequenceValue } = require('../Counters/CounterService');
@@ -13,17 +13,35 @@ async function getDrivers(req, res) {
     }
 }
 
+
+
 async function getDriverByID(req, res) {
     const { id } = req.params;
     try {
         const driver = await getDriverByIDFromDB(id);
         if (driver) {
-            res.status(200).send(driver);
+            res.status(200).send(driver.fullName);
         } else {
             res.status(404).send({ error: 'Driver not found' });
         }
     } catch (error) {
         console.error('Error fetching driver by ID:', error);
+        res.status(500).send({ error: 'Internal server error' });
+    }
+}
+
+async function getDriverNameByID(req, res) {
+    const { id } = req.params;
+
+    try {
+        const driver = await getDriverNameByIDFromDB(id);
+        if (driver) {
+            res.status(200).send({ fullName: driver.fullName });
+        } else {
+            res.status(404).send({ error: 'Driver not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching driver name by ID:', error);
         res.status(500).send({ error: 'Internal server error' });
     }
 }
@@ -177,4 +195,4 @@ async function deleteDriver(req, res) {
     }
 }
 
-module.exports = { getDrivers, getDriverByID, checkDriverCredentials, getDriverIDByName, createDriver, updateDriver, deleteDriver };
+module.exports = { getDrivers, getDriverByID, getDriverNameByID,checkDriverCredentials, getDriverIDByName, createDriver, updateDriver, deleteDriver };
