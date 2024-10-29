@@ -1,6 +1,7 @@
 const { getNextSequenceValue } = require('../Counters/CounterService');
 const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
+const uploadImage = require('../ImageUpload/uploadImage'); // Adjust path as needed
 
 async function getTrips(req, res) {
     try {
@@ -29,6 +30,8 @@ async function getTrip(req, res) {
 
 async function createTrip(req, res) {
     let { TripName, TripType, OpenHour, CloseHour, Description } = req.body;
+    const imagePath = req.file?.path;  // Assuming `req.file.path` has the image path from multer
+    let imageURL = null;  // Initialize imageURL as null
 
     if (!TripName || !TripType || !Description) {
         return res.status(400).send({ error: 'TripName, TripType, and Description are required' });
@@ -48,7 +51,11 @@ async function createTrip(req, res) {
 
     try {
         const TripID = await getNextSequenceValue('Trips');
-        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description };
+        if (imagePath) {
+            const imageResult = await uploadImage(imagePath, 'Trips'); 
+            imageURL = imageResult.secure_url;  
+        }
+        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description, ImageURL: imageURL };
         await createTripInDB(newTrip);
         res.status(201).send({ message: 'Trip created successfully', tripId: TripID });
     } catch (error) {
