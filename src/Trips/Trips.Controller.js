@@ -29,39 +29,34 @@ async function getTrip(req, res) {
 }
 
 async function createTrip(req, res) {
-    let { TripName, TripType, OpenHour, CloseHour, Description } = req.body;
-    const imagePath = req.file?.path;  // Assuming `req.file.path` has the image path from multer
-    let imageURL = null;  // Initialize imageURL as null
+  let { TripName, TripType, OpenHour, CloseHour, Description } = req.body;
+  const imagePath = req.file?.path; // Assuming req.file.path has the image path from multer
+  let imageURL = null; // Initialize imageURL as null
 
-    if (!TripName || !TripType || !Description) {
-        return res.status(400).send({ error: 'TripName, TripType, and Description are required' });
+  if (!TripName || !TripType || !Description) {
+    return res.status(400).send({ error: 'TripName, TripType, and Description are required' });
+  }
+
+  OpenHour = OpenHour ? JSON.parse(OpenHour) : Array(7).fill("Closed");
+  CloseHour = CloseHour ? JSON.parse(CloseHour) : Array(7).fill("Closed");
+
+  try {
+    const TripID = await getNextSequenceValue('Trips'); // Assuming you have a function to generate TripID
+    if (imagePath) {
+      const imageResult = await uploadImage(imagePath, 'Trips');
+      imageURL = imageResult.secure_url;
     }
-
-    OpenHour = OpenHour || [];
-    CloseHour = CloseHour || [];
-
-    if (OpenHour.length === 0 && CloseHour.length === 0) {
-        OpenHour = Array(7).fill("00:00");
-        CloseHour = Array(7).fill("23:59");
-
-    } else if (OpenHour.length < 7) {
-        OpenHour = OpenHour.concat(Array(7 - OpenHour.length).fill("Closed"));
-        CloseHour = CloseHour.concat(Array(7 - CloseHour.length).fill("Closed"));
+    const newTrip = new Trip({ TripID, TripName, TripType, OpenHour, CloseHour, Description, ImageURL: imageURL });
+    await newTrip.save();
+    res.status(201).send({ message: 'Trip created successfully', tripId: TripID });
+  } catch (error) {
+    console.error('Error creating trip:', error);
+    res.status(500).send({ error: 'Internal server error', details: error.message });
+  } finally {
+    if (imagePath) {
+      fs.unlinkSync(imagePath); // Delete the local image after uploading to Cloudinary
     }
-
-    try {
-        const TripID = await getNextSequenceValue('Trips');
-        if (imagePath) {
-            const imageResult = await uploadImageBase64(ImageUri, 'Trips');
-            imageURL = imageResult.secure_url;  
-        }
-        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description, ImageURL: imageURL };
-        await createTripInDB(newTrip);
-        res.status(201).send({ message: 'Trip created successfully', tripId: TripID });
-    } catch (error) {
-        console.error('Error creating trip:', error);
-        res.status(500).send({ error: 'Internal server error', details: error.message });
-    }
+  }
 }
 
 
