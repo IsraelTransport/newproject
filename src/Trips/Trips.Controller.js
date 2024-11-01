@@ -52,7 +52,7 @@ async function createTrip(req, res) {
     try {
         const TripID = await getNextSequenceValue('Trips');
         if (imagePath) {
-            const imageResult = await uploadImage(imagePath, 'Trips'); 
+            const imageResult = await uploadImageBase64(ImageUri, 'Trips');
             imageURL = imageResult.secure_url;  
         }
         const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description, ImageURL: imageURL };
