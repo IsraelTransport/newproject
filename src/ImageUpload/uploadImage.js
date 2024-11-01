@@ -1,5 +1,5 @@
 const cloudinary = require('./cloudinaryConfig');
-
+const fs = require('fs');
 async function uploadImageBase64(base64String, folderName) {
   try {
     // Upload the base64 string to Cloudinary
