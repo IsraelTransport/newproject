@@ -1,15 +1,11 @@
 const cloudinary = require('./cloudinaryConfig');
-const fs = require('fs');
 
-async function uploadImage(imagePath, folderName) {
+async function uploadImageBase64(base64String, folderName) {
   try {
-    // Upload the file directly from the local path provided by Multer
-    const result = await cloudinary.uploader.upload(imagePath, {
+    // Upload the base64 string to Cloudinary
+    const result = await cloudinary.uploader.upload(base64String, {
       folder: folderName,
     });
-    
-    // Optionally delete the local file after upload if you don't need to keep it
-    fs.unlinkSync(imagePath);
 
     return result;
   } catch (error) {
@@ -18,4 +14,6 @@ async function uploadImage(imagePath, folderName) {
   }
 }
 
-module.exports = uploadImage;
+module.exports = {
+  uploadImageBase64,
+};
