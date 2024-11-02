@@ -12,11 +12,10 @@ server.use(cors());
 
 server.use('/api', routes);
 
-// MongoDB connection with custom timeout (increase serverSelectionTimeoutMS)
 mongoose.connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 30000 // Set timeout to 30 seconds (30000ms)
+    serverSelectionTimeoutMS: 30000 
 }).then(() => {
     console.log('Connected to MongoDB');
 }).catch((error) => {

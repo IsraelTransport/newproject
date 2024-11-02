@@ -2,7 +2,7 @@ const { getNextSequenceValue } = require('../Counters/CounterService');
 const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
 const uploadImage = require('../ImageUpload/uploadImage'); // Adjust path as needed
-
+const convertImageToBase64 = require('../ImageUpload/convertImageToBase64')
 async function getTrips(req, res) {
     try {
         const trips = await getTripsFromDB();
@@ -29,38 +29,43 @@ async function getTrip(req, res) {
 }
 
 async function createTrip(req, res) {
-  let { TripName, TripType, OpenHour, CloseHour, Description } = req.body;
-  const imagePath = req.file?.path; // Assuming req.file.path has the image path from multer
-  let imageURL = null; // Initialize imageURL as null
+    let { TripName, TripType, OpenHour, CloseHour, Description } = req.body;
+    const imagePath = req.file?.path;  // Assuming req.file.path has the image path from multer
+    let imageURL = null;  // Initialize imageURL as null
 
-  if (!TripName || !TripType || !Description) {
-    return res.status(400).send({ error: 'TripName, TripType, and Description are required' });
-  }
-
-  OpenHour = OpenHour ? JSON.parse(OpenHour) : Array(7).fill("Closed");
-  CloseHour = CloseHour ? JSON.parse(CloseHour) : Array(7).fill("Closed");
-
-  try {
-    const TripID = await getNextSequenceValue('Trips'); // Assuming you have a function to generate TripID
-    if (imagePath) {
-      const imageResult = await uploadImage(imagePath, 'Trips');
-      imageURL = imageResult.secure_url;
+    if (!TripName || !TripType || !Description) {
+        return res.status(400).send({ error: 'TripName, TripType, and Description are required' });
     }
-    const newTrip = new Trip({ TripID, TripName, TripType, OpenHour, CloseHour, Description, ImageURL: imageURL });
-    await newTrip.save();
-    res.status(201).send({ message: 'Trip created successfully', tripId: TripID });
-  } catch (error) {
-    console.error('Error creating trip:', error);
-    res.status(500).send({ error: 'Internal server error', details: error.message });
-  } finally {
-    if (imagePath) {
-      fs.unlinkSync(imagePath); // Delete the local image after uploading to Cloudinary
+
+    OpenHour = OpenHour || [];
+    CloseHour = CloseHour || [];
+
+    if (OpenHour.length === 0 && CloseHour.length === 0) {
+        OpenHour = Array(7).fill("00:00");
+        CloseHour = Array(7).fill("23:59");
+
+    } else if (OpenHour.length < 7) {
+        OpenHour = OpenHour.concat(Array(7 - OpenHour.length).fill("Closed"));
+        CloseHour = CloseHour.concat(Array(7 - CloseHour.length).fill("Closed"));
     }
-  }
+
+    try {
+        const TripID = await getNextSequenceValue('Trips');
+        if (imagePath) {
+            const Base64Image = convertImageToBase64(imagePath);
+            if(Base64Image){
+                const imageResult = await uploadImage(Base64Image); 
+                imageURL = imageResult.secure_url;  
+            }
+        }
+        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description, ImageURL: imageURL };
+        await createTripInDB(newTrip);
+        res.status(201).send({ message: 'Trip created successfully', tripId: TripID });
+    } catch (error) {
+        console.error('Error creating trip:', error);
+        res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
 }
-
-
-
 
 
 async function getTripIDByName(req, res) {
