@@ -3,18 +3,15 @@ const { convertImageToBase64 } = require('./convertImageToBase64');
 const { uploadImage } = require('./uploadImage'); 
 
 async function uploadImageController(req, res) {
-    const { tripName } = req.body;  // Trip name should be sent from the frontend
+    const { tripName } = req.body;  // Trip name and folder name from frontend
     const imagePath = req.file?.path;
 
-    if (!imagePath || !tripName) {
-        return res.status(400).send({ error: 'Image file and trip name are required' });
+    if (!imagePath) {
+        return res.status(400).send({ error: 'Image file, trip name, and folder name are required' });
     }
-
-    const folderName = 'Trips';  // Set default folder name to 'Trips'
-    
     try {
         const base64Image = convertImageToBase64(imagePath);
-        const uploadResult = await uploadImage(base64Image, folderName, tripName);
+        const uploadResult = await uploadImage(base64Image, folderName = 'Trips', tripName);
         
         const imageURL = uploadResult.secure_url;
         fs.unlinkSync(imagePath);  // Optionally delete the local image file

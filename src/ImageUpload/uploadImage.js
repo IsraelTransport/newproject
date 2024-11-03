@@ -1,11 +1,8 @@
 const cloudinary = require('./cloudinaryConfig');
 
-async function uploadImage(base64, folderName = 'Trips', publicId) {  // Default folder to 'Trips'
+async function uploadImage(base64, FolderName) {
   try {
-    const result = await cloudinary.uploader.upload(base64, {
-      folder: folderName,
-      public_id: publicId  // Name the image with tripName
-    });
+    const result = await cloudinary.uploader.upload(base64, {upload_present: 'IsraelTransport'})
     return result;
   } catch (error) {
     console.error('Error uploading image:', error);

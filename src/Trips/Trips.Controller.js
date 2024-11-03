@@ -30,6 +30,8 @@ async function getTrip(req, res) {
 
 async function createTrip(req, res) {
     let { TripName, TripType, OpenHour, CloseHour, Description } = req.body;
+    const imagePath = req.file?.path;  // Path to the image file from multer
+    let imageURL = `${CLOUDINARY_BASE_URL}${TripName}`;
     if (!TripName || !TripType || !Description) {
         return res.status(400).send({ error: 'TripName, TripType, and Description are required' });
     }
@@ -48,7 +50,8 @@ async function createTrip(req, res) {
 
     try {
         const TripID = await getNextSequenceValue('Trips');
-        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description };
+    
+        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description, ImageURL: imageURL };
         await createTripInDB(newTrip);
         res.status(201).send({ message: 'Trip created successfully', tripId: TripID });
     } catch (error) {
