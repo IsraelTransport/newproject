@@ -1,8 +1,7 @@
 const { getNextSequenceValue } = require('../Counters/CounterService');
 const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
-const uploadImage = require('../ImageUpload/uploadImage'); // Adjust path as needed
-const convertImageToBase64 = require('../ImageUpload/convertImageToBase64')
+const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/du0byjmkm/image/upload/v1730665167/Trips/';
 async function getTrips(req, res) {
     try {
         const trips = await getTripsFromDB();
