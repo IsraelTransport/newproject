@@ -1,6 +1,6 @@
 const cloudinary = require('./cloudinaryConfig');
 
-async function uploadImage(base64, folderName, publicId) {
+async function uploadImage(base64, folderName = 'Trips', publicId) {  // Default folder to 'Trips'
   try {
     const result = await cloudinary.uploader.upload(base64, {
       folder: folderName,
