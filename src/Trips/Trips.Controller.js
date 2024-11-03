@@ -48,7 +48,7 @@ async function createTrip(req, res) {
 
     try {
         const TripID = await getNextSequenceValue('Trips');
-        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description, ImageURL: imageURL };
+        const newTrip = { TripID, TripName, TripType, OpenHour, CloseHour, Description };
         await createTripInDB(newTrip);
         res.status(201).send({ message: 'Trip created successfully', tripId: TripID });
     } catch (error) {
