@@ -7,7 +7,7 @@ const TripSchema = new mongoose.Schema({
     OpenHour: { type: [String], required: false },
     CloseHour: { type: [String], required: false },
     Description: { type: String, required: true },
-    ImageURL: { type: String, required: false } // New field for image URL
+    ImageURL: { type: String, required: false } // Field for storing the Cloudinary image URL
 }, { versionKey: false });
 
 module.exports = mongoose.model('Trip', TripSchema);
