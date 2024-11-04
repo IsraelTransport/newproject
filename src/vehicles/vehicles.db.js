@@ -72,11 +72,26 @@ async function deleteVehicleFromDB(id) {
         await mongo.close();
     }
 }
-
+async function updateVehicleKmInDB(id, Km) {
+    const mongo = new MongoClient(DB_INFO.uri);
+    try {
+        await mongo.connect();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).updateOne(
+            { VehicleID: parseInt(id) },
+            { $set: { Km: Km } }
+        );
+    } catch (error) {
+        console.error('Error updating vehicle Km:', error);
+        throw error;
+    } finally {
+        await mongo.close();
+    }
+}
 module.exports = {
     getVehiclesFromDB,
     getVehicleByID,
     createVehicleInDB,
     updateVehicleInDB,
-    deleteVehicleFromDB
+    deleteVehicleFromDB,
+    updateVehicleKmInDB 
 };

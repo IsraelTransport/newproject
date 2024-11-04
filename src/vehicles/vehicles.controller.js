@@ -3,7 +3,8 @@ const {
     getVehicleByID, 
     createVehicleInDB, 
     updateVehicleInDB, 
-    deleteVehicleFromDB 
+    deleteVehicleFromDB,
+    updateVehicleKmInDB
 } = require('./vehicles.db');
 const Vehicle = require('./vehicles.model');
 const { getNextSequenceValue } = require('../Counters/CounterService');
@@ -83,4 +84,25 @@ async function deleteVehicle(req, res) {
     }
 }
 
-module.exports = { getVehicles, getVehicle, createVehicle, updateVehicle, deleteVehicle };
+async function updateVehicleKm(req, res) {
+    const { id } = req.params;
+    const { Km } = req.body;
+
+    if (Km == null) {
+        return res.status(400).send({ error: 'Km value is required' });
+    }
+
+    try {
+        const result = await updateVehicleKmInDB(id, Km);  // Use the new DB function
+        if (result.modifiedCount > 0) {
+            res.status(200).send({ message: 'Vehicle Km updated successfully' });
+        } else {
+            res.status(404).send({ error: 'Vehicle not found or Km not updated' });
+        }
+    } catch (error) {
+        console.error('Error updating vehicle Km:', error);
+        res.status(500).send({ error: 'Internal server error' });
+    }
+}
+
+module.exports = { getVehicles, getVehicle, createVehicle, updateVehicle, updateVehicleKm , deleteVehicle };
