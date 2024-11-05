@@ -5,8 +5,8 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    verified: { type: Boolean, default: false }, // Added this field for email verification
-    verificationCode: { type: Number  }, // Temporary code for email verification
+    verified: { type: Boolean, default: false }, 
+    verificationCode: { type: Number  },
     language: { type: String, required: true },
     country: { type: String, required: true },
     city: { type: String, required: true },

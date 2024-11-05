@@ -1,7 +1,7 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose'); // Add Mongoose here
+const mongoose = require('mongoose'); 
 const routes = require('./src');
 const bcrypt = require('bcryptjs');
 const PORT = process.env.PORT || 5005;
@@ -22,5 +22,4 @@ mongoose.connect(process.env.CONNECTION_STRING, {
     console.error('Error connecting to MongoDB:', error);
 });
 
-// Start the server
 server.listen(PORT, () => console.log(`[SERVER] http://localhost:${PORT}`));

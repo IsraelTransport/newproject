@@ -1,5 +1,5 @@
 const { MongoClient } = require('mongodb');
-const Driver = require('./Drivers.Model'); // Adjust the path if needed
+const Driver = require('./Drivers.Model'); 
 
 const DB_INFO = {
     uri: process.env.CONNECTION_STRING,
@@ -37,7 +37,6 @@ async function getDriverNameByIDFromDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        // Fetch only the fullName field based on userID
         const driver = await mongo.db(DB_INFO.name).collection(DB_INFO.collection).findOne({ userID: parseInt(id) }, { projection: { fullName: 1, _id: 0 } });
         return driver;
     } catch (error) {

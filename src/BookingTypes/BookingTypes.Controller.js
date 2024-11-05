@@ -42,19 +42,15 @@ async function createBookingType(req, res) {
     }
 
     try {
-        // Get the next BookingTypeID from the Counters collection
         const bookingTypeID = await getNextSequenceValue('BookingTypes');
 
-        // Prepare the data to be inserted
         const bookingTypeData = {
             BookingTypeID: bookingTypeID,
             TypeName
         };
 
-        // Insert the data into the database
         const newBookingType = await createBookingTypeInDB(bookingTypeData);
 
-        // Return the response
         res.status(201).send({
             message: 'Booking type created successfully',
             newBookingType

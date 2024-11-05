@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { getUserByUsername,updateUserEmailInDB, getUserByEmail, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
-const { sendVerificationEmail } = require('../EmailVerifying/email'); // Import email sending function
+const { sendVerificationEmail } = require('../EmailVerifying/email'); 
 const { getNextSequenceValue } = require('../Counters/CounterService');
 const userTypeMap = {
     1: 'admin',
@@ -118,12 +118,11 @@ async function createUser(req, res) {
             userTypeID,
             userType: userTypeID === 1 ? 'admin' : 'client',
             verified: false,
-            verificationCode // Add the verification code to the user document
+            verificationCode 
         };
 
         await createUserInDB(newUser);
 
-        // Send verification code by email
         await sendVerificationEmail(newUser.email, verificationCode);
 
         res.status(201).send({ message: 'User created successfully. Please enter the code sent to your email to verify your account.' });
@@ -237,7 +236,6 @@ async function verifyUser(req, res) {
             return res.status(400).send({ error: 'Invalid verification code.' });
         }
 
-        // Set user as verified
         await updateUserInDB(user.userID, { verified: true, verificationCode: null });
         res.status(200).send({ message: 'Email verified successfully.' });
     } catch (error) {

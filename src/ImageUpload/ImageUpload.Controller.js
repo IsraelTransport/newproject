@@ -3,7 +3,7 @@ const { convertImageToBase64 } = require('./convertImageToBase64');
 const { uploadImage } = require('./uploadImage'); 
 
 async function uploadImageController(req, res) {
-    const { tripName } = req.body;  // Trip name and folder name from frontend
+    const { tripName } = req.body;  
     const imagePath = req.file?.path;
 
     if (!imagePath) {
@@ -14,7 +14,7 @@ async function uploadImageController(req, res) {
         const uploadResult = await uploadImage(base64Image, folderName = 'Trips', tripName);
         
         const imageURL = uploadResult.secure_url;
-        fs.unlinkSync(imagePath);  // Optionally delete the local image file
+        fs.unlinkSync(imagePath); 
         res.status(201).send({ message: 'Image uploaded successfully', imageURL });
     } catch (error) {
         console.error('Error uploading image:', error);

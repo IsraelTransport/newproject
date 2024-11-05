@@ -5,5 +5,4 @@ const CounterSchema = new mongoose.Schema({
     count: { type: Number, required: true } 
 });
 
-// Export the Counter model
 module.exports = mongoose.model('Counter', CounterSchema, 'Counters');

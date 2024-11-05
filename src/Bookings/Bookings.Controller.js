@@ -1,7 +1,7 @@
 const { getNextSequenceValue } = require('../Counters/CounterService');
 const { createBookingInDB, getBookingsFromDB, getBookingByIDInDB, updateBookingInDB, deleteBookingFromDB } = require('./Bookings.db');
 const Booking = require('./Bookings.Model');
-const { sendEmail } = require('../EmailVerifying/email'); // Generalized email sending function
+const { sendEmail } = require('../EmailVerifying/email');
 
 async function getBookings(req, res) {
     try {
@@ -86,7 +86,6 @@ async function updateBooking(req, res) {
         if (result.modifiedCount > 0) {
             res.status(200).send({ message: 'Booking updated successfully' });
 
-            // Check if status is "Confirmed" or "Cancelled" and send email if status changed
             if (isStatusChanged && (updateData.status === 'Confirmed' || updateData.status === 'Cancelled')) {
                 const emailSubject = `Booking ${updateData.status}`;
                 const emailBody = `

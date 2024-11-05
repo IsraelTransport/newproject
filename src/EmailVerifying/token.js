@@ -1,4 +1,4 @@
-require('dotenv').config();  // Import and configure dotenv
+require('dotenv').config(); 
 const jwt = require('jsonwebtoken');
 
 function generateVerificationToken(userId) {

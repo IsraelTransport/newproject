@@ -1,28 +1,25 @@
 const Schedule = require('./Schedule.Model');
 
-// Create schedule
 async function createScheduleInDB(scheduleData) {
     try {
         const newSchedule = new Schedule(scheduleData);
-        return await newSchedule.save();  // Save the schedule document to MongoDB
+        return await newSchedule.save();  
     } catch (error) {
         throw error;
     }
 }
 
-// Get all schedules
 async function getSchedulesFromDB() {
     try {
-        return await Schedule.find();  // Retrieve all documents in the Schedule collection
+        return await Schedule.find(); 
     } catch (error) {
         throw error;
     }
 }
 
-// Get schedule by ID
 async function getScheduleByIDFromDB(id) {
     try {
-        return await Schedule.findOne({ scheduleID: id });  // Find the schedule by scheduleID
+        return await Schedule.findOne({ scheduleID: id });
     } catch (error) {
         throw error;
     }
@@ -38,19 +35,17 @@ async function getScheduleByUserIDFromDB(userID) {
     }
 }
 
-// Update schedule
 async function updateScheduleInDB(id, updateData) {
     try {
-        return await Schedule.updateOne({ scheduleID: id }, { $set: updateData });  // Update the document
+        return await Schedule.updateOne({ scheduleID: id }, { $set: updateData });  
     } catch (error) {
         throw error;
     }
 }
 
-// Delete schedule
 async function deleteScheduleFromDB(id) {
     try {
-        return await Schedule.deleteOne({ scheduleID: id });  // Delete the schedule by scheduleID
+        return await Schedule.deleteOne({ scheduleID: id });  
     } catch (error) {
         throw error;
     }

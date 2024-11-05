@@ -6,7 +6,7 @@ router.get('/GetAllVehicles', getVehicles);
 router.get('/GetVehicle/:id', getVehicle);
 router.post('/CreateVehicle', createVehicle);
 router.put('/UpdateVehicle/:id', updateVehicle);
-router.put('/UpdateVehicleKm/:id', updateVehicleKm);  // New route for updating Km
+router.put('/UpdateVehicleKm/:id', updateVehicleKm);  
 router.delete('/DeleteVehicle/:id', deleteVehicle);
 
 module.exports = router;

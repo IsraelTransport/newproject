@@ -2,7 +2,6 @@ const { getNextSequenceValue } = require('../Counters/CounterService'); // for a
 const { createScheduleInDB, getSchedulesFromDB, getScheduleByIDFromDB, updateScheduleInDB, deleteScheduleFromDB } = require('./Schedule.db');
 const Schedule = require('./Schedule.Model');
 
-// Create a new schedule
 async function createSchedule(req, res) {
     const { assignedDate, tripID, driverID } = req.body;
 
@@ -14,7 +13,7 @@ async function createSchedule(req, res) {
         const scheduleID = await getNextSequenceValue('Schedules');
         const newSchedule = new Schedule({
             scheduleID,
-            assignedDate, // Use assignedDate here
+            assignedDate, 
             tripID,
             driverID
         });
@@ -28,7 +27,6 @@ async function createSchedule(req, res) {
 }
 
 
-// Get all schedules
 async function getSchedules(req, res) {
     try {
         const schedules = await getSchedulesFromDB();
@@ -39,7 +37,6 @@ async function getSchedules(req, res) {
     }
 }
 
-// Get a specific schedule by ID
 async function getScheduleByID(req, res) {
     const { id } = req.params;
 
@@ -71,7 +68,6 @@ async function getScheduleByUserID(req, res) {
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
-// Update a schedule
 async function updateSchedule(req, res) {
     const { id } = req.params;
     const updateData = req.body;
@@ -89,7 +85,6 @@ async function updateSchedule(req, res) {
     }
 }
 
-// Delete a schedule
 async function deleteSchedule(req, res) {
     const { id } = req.params;
 

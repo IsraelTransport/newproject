@@ -5,14 +5,14 @@ async function getNextSequenceValue(collectionName) {
         const result = await Counter.findOneAndUpdate(
             { _id: collectionName },
             { $inc: { count: 1 } },
-            { new: true, upsert: true }  // Create the entry if it doesn't exist
+            { new: true, upsert: true } 
         );
 
         if (!result) {
             throw new Error(`No Counter found for collection ${collectionName}`);
         }
 
-        return result.count;  // Return the incremented count
+        return result.count;  
     } catch (error) {
         console.error(`Error getting next sequence value for ${collectionName}:`, error);
         throw error;
