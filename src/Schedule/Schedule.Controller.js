@@ -1,5 +1,5 @@
 const { getNextSequenceValue } = require('../Counters/CounterService'); // for auto-incremented IDs
-const { createScheduleInDB, getSchedulesFromDB, getScheduleByIDFromDB, updateScheduleInDB, deleteScheduleFromDB } = require('./Schedule.db');
+const { createScheduleInDB, getSchedulesFromDB, getScheduleByIDFromDB,getScheduleByDriverIDFromDB, updateScheduleInDB, deleteScheduleFromDB } = require('./Schedule.db');
 const Schedule = require('./Schedule.Model');
 
 async function createSchedule(req, res) {
@@ -53,18 +53,18 @@ async function getScheduleByID(req, res) {
     }
 }
 
-async function getScheduleByUserID(req, res) {
-    const { userID } = req.params;
+async function getScheduleByDriverID(req, res) {
+    const { driverID } = req.params;
 
     try {
-        const schedules = await Schedule.find({ userID: parseInt(userID) });
+        const schedules = await getScheduleByDriverIDFromDB(driverID);
         if (schedules.length > 0) {
             res.status(200).send(schedules);
         } else {
-            res.status(404).send({ error: 'No schedules found for the specified user ID' });
+            res.status(404).send({ error: 'No schedules found for the specified driver ID' });
         }
     } catch (error) {
-        console.error('Error fetching schedules by user ID:', error);
+        console.error('Error fetching schedules by driver ID:', error);
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
@@ -101,4 +101,4 @@ async function deleteSchedule(req, res) {
     }
 }
 
-module.exports = { createSchedule, getScheduleByUserID, getSchedules, getScheduleByID, updateSchedule, deleteSchedule };
+module.exports = { createSchedule, getScheduleByDriverID, getSchedules, getScheduleByID, updateSchedule, deleteSchedule };
