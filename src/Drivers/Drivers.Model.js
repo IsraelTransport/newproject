@@ -8,6 +8,7 @@ const DriverSchema = new mongoose.Schema({
     language: { type: String, required: true },
     country: { type: String, required: true },
     city: { type: String, required: true },
+    UserType: {type: String},
     userID: { type: Number, required: true, unique: true },
     drivingLicense: { type: String, required: true },
     drivingLicenseExpiration: { type: Date, required: true }

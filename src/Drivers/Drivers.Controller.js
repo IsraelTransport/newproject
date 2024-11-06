@@ -92,7 +92,8 @@ async function createDriver(req, res) {
             city,
             userID,
             drivingLicense,
-            drivingLicenseExpiration
+            drivingLicenseExpiration,
+            UserType : "Driver"
         });
 
         await createDriverInDB(newDriver);
