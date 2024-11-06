@@ -87,8 +87,8 @@ async function createUser(req, res) {
         return res.status(400).send({ error: 'All fields are required' });
     }
 
-    if (![1, 2].includes(userTypeID)) {
-        return res.status(400).send({ error: 'User type must be 1 or 2' });
+    if (![1, 2, 3].includes(userTypeID)) {
+        return res.status(400).send({ error: 'User Type Must Be Between 1 to 3' });
     }
 
     try {
