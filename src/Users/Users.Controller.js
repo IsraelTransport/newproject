@@ -76,7 +76,7 @@ async function checkUserCredentials(req, res) {
             res.status(200).send({
                 message: 'Driver authenticated successfully',
                 userType: 'Driver',
-                driver: { userID, fullName, username, email, language, country, city, drivingLicense, drivingLicenseExpiration }
+                driver: { userID, fullName, username, email, language, country, city, drivingLicense, drivingLicenseExpiration,UserType }
             });
         } else {
             const { userID, fullName, email, userType } = user;
