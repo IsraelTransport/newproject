@@ -72,11 +72,11 @@ async function checkUserCredentials(req, res) {
 
         // Prepare response based on whether it's a user or driver
         if (isDriver) {
-            const { userID, fullName, email, language, country, city, drivingLicense, drivingLicenseExpiration } = user;
+            const { userID, fullName, email, language, country, city, drivingLicense, drivingLicenseExpiration, userType } = user;
             res.status(200).send({
                 message: 'Driver authenticated successfully',
                 userType: 'Driver',
-                driver: { userID, fullName, username, email, language, country, city, drivingLicense, drivingLicenseExpiration,UserType }
+                driver: { userID, fullName, username, email, language, country, city, drivingLicense, drivingLicenseExpiration, userType }
             });
         } else {
             const { userID, fullName, email, userType } = user;
@@ -91,6 +91,7 @@ async function checkUserCredentials(req, res) {
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
+
 
 
 async function listAllUsers(req, res) {
