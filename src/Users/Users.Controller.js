@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { getUserByUsername,updateUserEmailInDB, getUserByEmail, getUserByIDInDB, updateUserInDB , deleteUserFromDB, getUsersFromDB, createUserInDB } = require('./Users.db');
 const User = require('./User.Model');
+const { getDriverByUsername } = require('../Drivers/Drivers.db'); // Driver database function
 const { sendVerificationEmail } = require('../EmailVerifying/email'); 
 const { getNextSequenceValue } = require('../Counters/CounterService');
 const userTypeMap = {
@@ -46,28 +47,51 @@ async function checkUserCredentials(req, res) {
     }
 
     try {
-        const user = await getUserByUsername(username);
+        // First, try to find the user in the Users collection
+        let user = await getUserByUsername(username);
+        let isDriver = false;
+
+        // If user is not found in Users, check in the Drivers collection
         if (!user) {
-            console.log('User not found');
+            user = await getDriverByUsername(username);
+            isDriver = !!user; // Set flag to indicate this is a driver, not a user
+        }
+
+        // If neither user nor driver is found, return error
+        if (!user) {
+            console.log('User or Driver not found');
             return res.status(401).send({ error: 'Invalid username or password' });
         }
 
+        // Check password
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             console.log('Invalid password');
             return res.status(401).send({ error: 'Invalid username or password' });
         }
 
-        const { userID, fullName, email, userType } = user;
-        res.status(200).send({
-            message: 'User authenticated successfully',
-            user: { userID, fullName, username, email, userType }
-        });
+        // Prepare response based on whether it's a user or driver
+        if (isDriver) {
+            const { userID, fullName, email, language, country, city, drivingLicense, drivingLicenseExpiration, userType } = user;
+            res.status(200).send({
+                message: 'Driver authenticated successfully',
+                userType: 'Driver',
+                driver: { userID, fullName, username, email, language, country, city, drivingLicense, drivingLicenseExpiration, userType }
+            });
+        } else {
+            const { userID, fullName, email, userType } = user;
+            res.status(200).send({
+                message: 'User authenticated successfully',
+                userType: 'User',
+                user: { userID, fullName, username, email, userType }
+            });
+        }
     } catch (error) {
         console.error('Error checking user credentials:', error);
         res.status(500).send({ error: 'Internal server error', details: error.message });
     }
 }
+
 
 
 async function listAllUsers(req, res) {
@@ -87,8 +111,8 @@ async function createUser(req, res) {
         return res.status(400).send({ error: 'All fields are required' });
     }
 
-    if (![1, 2].includes(userTypeID)) {
-        return res.status(400).send({ error: 'User type must be 1 or 2' });
+    if (![1, 2, 3].includes(userTypeID)) {
+        return res.status(400).send({ error: 'User Type Must Be Between 1 to 3' });
     }
 
     try {

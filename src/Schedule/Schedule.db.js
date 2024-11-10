@@ -25,12 +25,12 @@ async function getScheduleByIDFromDB(id) {
     }
 }
 
-async function getScheduleByUserIDFromDB(userID) {
+async function getScheduleByDriverIDFromDB(driverID) {
     try {
-        const schedules = await Schedule.find({ userID: parseInt(userID) });
+        const schedules = await Schedule.find({ driverID: parseInt(driverID) });
         return schedules;
     } catch (error) {
-        console.error('Error fetching schedules by user ID from DB:', error);
+        console.error('Error fetching schedules by driver ID from DB:', error);
         throw error;
     }
 }
@@ -51,4 +51,4 @@ async function deleteScheduleFromDB(id) {
     }
 }
 
-module.exports = { createScheduleInDB, getScheduleByUserIDFromDB, getSchedulesFromDB, getScheduleByIDFromDB, updateScheduleInDB, deleteScheduleFromDB };
+module.exports = { createScheduleInDB, getScheduleByDriverIDFromDB, getSchedulesFromDB, getScheduleByIDFromDB, updateScheduleInDB, deleteScheduleFromDB };
