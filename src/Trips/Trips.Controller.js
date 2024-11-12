@@ -2,6 +2,9 @@ const { getNextSequenceValue } = require('../Counters/CounterService');
 const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
 const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/du0byjmkm/image/upload/v1730665167/Trips/';
+const { sendEmail } = require('../EmailVerifying/email');
+const moment = require('moment');
+
 async function getTrips(req, res) {
     try {
         const trips = await getTripsFromDB();
@@ -11,7 +14,32 @@ async function getTrips(req, res) {
         res.status(500).send({ error: 'Internal server error' });
     }
 }
+async function sendTripReminders() {
+    const tomorrow = moment().add(1, 'day').startOf('day');
+    const dayAfterTomorrow = moment().add(2, 'day').startOf('day');
 
+    try {
+        const trips = await Trip.find({
+            Date: { $gte: tomorrow.toDate(), $lt: dayAfterTomorrow.toDate() },
+            ReminderSent: false
+        });
+
+        for (const trip of trips) {
+            const subject = `Reminder: Upcoming Trip - ${trip.TripName}`;
+            const htmlContent = `<p>This is a reminder for your upcoming trip to ${trip.TripName} on ${moment(trip.Date).format("MMMM Do YYYY, h:mm a")}.</p>`;
+            const userEmail = 'user@example.com'; // Replace this with actual user email logic
+
+            await sendEmail(userEmail, subject, htmlContent);
+
+            trip.ReminderSent = true;
+            await trip.save();
+        }
+        
+        console.log("Reminders sent for trips scheduled for tomorrow.");
+    } catch (error) {
+        console.error("Error sending trip reminders:", error);
+    }
+}
 async function getTrip(req, res) {
     const { id } = req.params;
     try {
@@ -135,4 +163,4 @@ async function deleteAllTrips(req, res) {
     }
 }
 
-module.exports = { getTrips, getTrip, deleteAllTrips , getTripIDByName, createTrip, updateTrip, deleteTrip };
+module.exports = { getTrips, getTrip, deleteAllTrips ,sendTripReminders, getTripIDByName, createTrip, updateTrip, deleteTrip };
