@@ -13,6 +13,32 @@ async function getBookings(req, res) {
     }
 }
 
+async function sendBookingReminders() {
+    const oneDayFromNow = new Date();
+    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1); // 1 day ahead
+
+    try {
+        const upcomingBookings = await Booking.find({
+            DepartureTime: { $lte: oneDayFromNow }, // Departure time within 1 day
+            status: 'Confirmed' // Only confirmed bookings
+        });
+
+        for (const booking of upcomingBookings) {
+            const subject = `Reminder: Upcoming Booking on ${booking.DepartureTime.toDateString()}`;
+            const htmlContent = `<p>Dear ${booking.FullName},</p>
+                <p>This is a reminder for your upcoming booking scheduled on ${booking.DepartureTime.toDateString()}.</p>
+                <p>Pickup Address: ${booking.PickupAddress}</p>
+                <p>Drop-Off Address: ${booking.DropOffAddress}</p>
+                <p>Please contact us if you have any questions.</p>`;
+
+            await sendEmail(booking.Email, subject, htmlContent);
+            console.log(`Reminder email sent to ${booking.Email} for Booking ID ${booking.BookingID}`);
+        }
+    } catch (error) {
+        console.error('Error sending booking reminders:', error);
+    }
+}
+
 async function getBookingByID(req, res) {
     const { id } = req.params;
     try {
@@ -120,4 +146,4 @@ async function deleteBooking(req, res) {
     }
 }
 
-module.exports = { getBookings, getBookingByID, createBooking, updateBooking, deleteBooking };
+module.exports = { getBookings, getBookingByID, createBooking,sendBookingReminders , updateBooking, deleteBooking };

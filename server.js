@@ -4,7 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose'); 
 const routes = require('./src');
 const cron = require('node-cron');
-const { sendTripReminders } = require('./src/Trips/Trips.Controller');
+const { sendBookingReminders } = require('./src/Bookings/Bookings.Controller');
 
 const PORT = process.env.PORT || 5005;
 const server = express();
@@ -24,10 +24,11 @@ mongoose.connect(process.env.CONNECTION_STRING, {
     console.error('Error connecting to MongoDB:', error);
 });
 
-// Schedule the reminder function to run every day at 8 AM
-cron.schedule('0 8 * * *', () => {
-    console.log("Running daily trip reminder check...");
-    sendTripReminders();
+cron.schedule('0 8 * * *', async () => {
+    console.log('Running daily booking reminder job');
+    await sendBookingReminders();
+}, {
+    timezone: "UTC" // Adjust the timezone as needed
 });
 
 // Start the server
