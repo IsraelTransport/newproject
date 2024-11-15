@@ -14,6 +14,8 @@ async function getBookings(req, res) {
 }
 
 async function sendBookingReminders() {
+    console.log("Checking for upcoming bookings...");
+
     const oneDayFromNow = new Date();
     oneDayFromNow.setDate(oneDayFromNow.getDate() + 1); // 1 day ahead
 
@@ -23,7 +25,13 @@ async function sendBookingReminders() {
             status: 'Confirmed' // Only confirmed bookings
         });
 
+        if (upcomingBookings.length === 0) {
+            console.log("No upcoming bookings found for reminder.");
+        }
+
         for (const booking of upcomingBookings) {
+            console.log(`Preparing to send reminder for Booking ID: ${booking.BookingID}`);
+
             const subject = `Reminder: Upcoming Booking on ${booking.DepartureTime.toDateString()}`;
             const htmlContent = `<p>Dear ${booking.FullName},</p>
                 <p>This is a reminder for your upcoming booking scheduled on ${booking.DepartureTime.toDateString()}.</p>

@@ -24,12 +24,14 @@ mongoose.connect(process.env.CONNECTION_STRING, {
     console.error('Error connecting to MongoDB:', error);
 });
 
-cron.schedule('0 8 * * *', async () => {
-    console.log('Running daily booking reminder job');
+cron.schedule('*/4 * * * *', async () => { // Runs every 4 minutes
+    console.log("Running reminder job...");
     await sendBookingReminders();
 }, {
-    timezone: "UTC" // Adjust the timezone as needed
+    timezone: "Asia/Jerusalem" // Set the timezone to Israel
 });
+
+
 
 // Start the server
 server.listen(PORT, () => console.log(`[SERVER] http://localhost:${PORT}`));
