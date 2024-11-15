@@ -16,17 +16,12 @@ async function getBookings(req, res) {
 async function sendBookingReminders() {
     console.log("Checking for upcoming bookings...");
 
-    const oneDayFromNow = new Date();
-    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1); // 1 day ahead
-
     try {
-        const upcomingBookings = await Booking.find({
-            DepartureTime: { $lte: oneDayFromNow }, // Departure time within 1 day
-            status: 'Confirmed' // Only confirmed bookings
-        });
+        const upcomingBookings = await getUpcomingBookingsWithinOneDay();
 
         if (upcomingBookings.length === 0) {
             console.log("No upcoming bookings found for reminder.");
+            return;
         }
 
         for (const booking of upcomingBookings) {
