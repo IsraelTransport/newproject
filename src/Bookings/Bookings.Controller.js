@@ -1,5 +1,5 @@
 const { getNextSequenceValue } = require('../Counters/CounterService');
-const { createBookingInDB, getBookingsFromDB, getBookingByIDInDB, updateBookingInDB, deleteBookingFromDB } = require('./Bookings.db');
+const { createBookingInDB, getBookingsFromDB, getBookingByIDInDB, updateBookingInDB, getUpcomingBookingsWithinOneDay,deleteBookingFromDB } = require('./Bookings.db');
 const Booking = require('./Bookings.Model');
 const { sendEmail } = require('../EmailVerifying/email');
 
