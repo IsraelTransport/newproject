@@ -24,11 +24,11 @@ mongoose.connect(process.env.CONNECTION_STRING, {
     console.error('Error connecting to MongoDB:', error);
 });
 
-cron.schedule('*/4 * * * *', async () => { // Runs every 4 minutes
+cron.schedule('0 8 * * *', async () => { // Runs every day at 8:00 AM
     console.log("Running reminder job...");
     await sendBookingReminders();
 }, {
-    timezone: "Asia/Jerusalem" // Set the timezone to Israel
+    timezone: "Asia/Jerusalem" // Set the timezone to match Israel's timezone
 });
 
 
