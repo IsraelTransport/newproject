@@ -31,6 +31,16 @@ async function getTripByIDFromDB(id) {
     }
 }
 
+async function getTripsByTypeFromDB(TripType) {
+    try {
+        const trips = await Trip.find({ TripType }); // Query the database by type
+        return trips;
+    } catch (error) {
+        console.error('Error fetching trips by type from DB:', error);
+        throw error;
+    }
+}
+
 async function createTripInDB(tripData) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
@@ -106,5 +116,6 @@ module.exports = {
     updateTripInDB,
     deleteTripFromDB,
     getTripIDByNameFromDB,
-    deleteAllTripsFromDB
+    deleteAllTripsFromDB,
+    getTripsByTypeFromDB
 };

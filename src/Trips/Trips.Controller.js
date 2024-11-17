@@ -1,5 +1,5 @@
 const { getNextSequenceValue } = require('../Counters/CounterService');
-const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
+const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripsByTypeFromDB ,getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
 const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/du0byjmkm/image/upload/v1730665167/Trips/';
 
@@ -55,6 +55,26 @@ async function createTrip(req, res) {
     } catch (error) {
         console.error('Error creating trip:', error);
         res.status(500).send({ error: 'Internal server error', details: error.message });
+    }
+}
+
+async function GetTripByType(req, res) {
+    const { TripType } = req.params;
+
+    if (!TripType) {
+        return res.status(400).send({ error: 'TripType is required' });
+    }
+
+    try {
+        const trips = await getTripsByTypeFromDB(TripType); // Call the DB function
+        if (trips.length > 0) {
+            res.status(200).send(trips);
+        } else {
+            res.status(404).send({ error: 'No trips found for the specified type' });
+        }
+    } catch (error) {
+        console.error('Error fetching trips by type:', error);
+        res.status(500).send({ error: 'Internal server error' });
     }
 }
 
@@ -135,4 +155,4 @@ async function deleteAllTrips(req, res) {
     }
 }
 
-module.exports = { getTrips, getTrip, deleteAllTrips , getTripIDByName, createTrip, updateTrip, deleteTrip };
+module.exports = { getTrips, getTrip, deleteAllTrips , getTripIDByName,GetTripByType, createTrip, updateTrip, deleteTrip };
