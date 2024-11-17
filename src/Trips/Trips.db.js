@@ -32,14 +32,18 @@ async function getTripByIDFromDB(id) {
 }
 
 async function getTripsByTypeFromDB(TripType) {
+    let mongo = new MongoClient(DB_INFO.uri);
     try {
-        const trips = await Trip.find({ TripType }); // Query the database by type
-        return trips;
+        await mongo.connect();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).find({ TripType }).toArray();
     } catch (error) {
         console.error('Error fetching trips by type from DB:', error);
         throw error;
+    } finally {
+        await mongo.close();
     }
 }
+
 
 async function createTripInDB(tripData) {
     let mongo = new MongoClient(DB_INFO.uri);
