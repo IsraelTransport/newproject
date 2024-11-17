@@ -35,7 +35,9 @@ async function getTripsByTypeFromDB(TripType) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
         await mongo.connect();
-        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).find({ TripType }).toArray();
+        return await mongo.db(DB_INFO.name).collection(DB_INFO.collection).find({
+            TripType: { $regex: TripType, $options: 'i' } // Case-insensitive partial match
+        }).toArray();
     } catch (error) {
         console.error('Error fetching trips by type from DB:', error);
         throw error;
@@ -43,6 +45,7 @@ async function getTripsByTypeFromDB(TripType) {
         await mongo.close();
     }
 }
+
 
 
 async function createTripInDB(tripData) {
