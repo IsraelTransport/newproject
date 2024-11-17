@@ -1,5 +1,5 @@
 const { getNextSequenceValue } = require('../Counters/CounterService');
-const { createBookingInDB, getBookingsFromDB, getBookingByIDInDB, updateBookingInDB, deleteBookingFromDB } = require('./Bookings.db');
+const { createBookingInDB, getBookingsFromDB, getBookingByIDInDB, updateBookingInDB, getUpcomingBookingsWithinOneDay,deleteBookingFromDB } = require('./Bookings.db');
 const Booking = require('./Bookings.Model');
 const { sendEmail } = require('../EmailVerifying/email');
 
@@ -10,6 +10,35 @@ async function getBookings(req, res) {
     } catch (error) {
         console.error('Error fetching bookings:', error);
         res.status(500).send({ error: 'Internal server error' });
+    }
+}
+
+async function sendBookingReminders() {
+    console.log("Checking for upcoming bookings...");
+
+    try {
+        const upcomingBookings = await getUpcomingBookingsWithinOneDay();
+
+        if (upcomingBookings.length === 0) {
+            console.log("No upcoming bookings found for reminder.");
+            return;
+        }
+
+        for (const booking of upcomingBookings) {
+            console.log(`Preparing to send reminder for Booking ID: ${booking.BookingID}`);
+
+            const subject = `Reminder: Upcoming Booking on ${booking.DepartureTime.toDateString()}`;
+            const htmlContent = `<p>Dear ${booking.FullName},</p>
+                <p>This is a reminder for your upcoming booking scheduled on ${booking.DepartureTime.toDateString()}.</p>
+                <p>Pickup Address: ${booking.PickupAddress}</p>
+                <p>Drop-Off Address: ${booking.DropOffAddress}</p>
+                <p>Please contact us if you have any questions.</p>`;
+
+            await sendEmail(booking.Email, subject, htmlContent);
+            console.log(`Reminder email sent to ${booking.Email} for Booking ID ${booking.BookingID}`);
+        }
+    } catch (error) {
+        console.error('Error sending booking reminders:', error);
     }
 }
 
@@ -118,4 +147,4 @@ async function deleteBooking(req, res) {
     }
 }
 
-module.exports = { getBookings, getBookingByID, createBooking, updateBooking, deleteBooking };
+module.exports = { getBookings, getBookingByID, createBooking,sendBookingReminders , updateBooking, deleteBooking };

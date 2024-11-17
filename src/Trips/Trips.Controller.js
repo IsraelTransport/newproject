@@ -2,6 +2,7 @@ const { getNextSequenceValue } = require('../Counters/CounterService');
 const { createTripInDB, getTripsFromDB, deleteAllTripsFromDB, getTripIDByNameFromDB, getTripByIDFromDB, updateTripInDB, deleteTripFromDB } = require('./Trips.db');
 const Trip = require('./Trips.Model');
 const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/du0byjmkm/image/upload/v1730665167/Trips/';
+
 async function getTrips(req, res) {
     try {
         const trips = await getTripsFromDB();
@@ -11,7 +12,6 @@ async function getTrips(req, res) {
         res.status(500).send({ error: 'Internal server error' });
     }
 }
-
 async function getTrip(req, res) {
     const { id } = req.params;
     try {

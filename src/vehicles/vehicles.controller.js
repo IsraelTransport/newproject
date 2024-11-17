@@ -8,6 +8,10 @@ const {
 } = require('./vehicles.db');
 const Vehicle = require('./vehicles.model');
 const { getNextSequenceValue } = require('../Counters/CounterService');
+const { sendEmail } = require('../EmailVerifying/email'); 
+
+
+
 async function getVehicles(req, res) {
     try {
         const vehicles = await getVehiclesFromDB();
@@ -93,8 +97,29 @@ async function updateVehicleKm(req, res) {
     }
 
     try {
-        const result = await updateVehicleKmInDB(id, Km);  // Use the new DB function
+        // Retrieve the vehicle to check current Km and last maintenance milestone
+        const vehicle = await getVehicleByID(id);
+        if (!vehicle) {
+            return res.status(404).send({ error: 'Vehicle not found' });
+        }
+
+        // Calculate the next maintenance milestone (every 10,000 km)
+        const nextMaintenanceMilestone = Math.floor(Km / 10000) * 10000;
+        const isNewMilestone = nextMaintenanceMilestone > (vehicle.lastMaintenanceKm || 0) && Km >= nextMaintenanceMilestone;
+
+        // Update the Km and, if a new milestone is reached, update lastMaintenanceKm
+        const updateData = { Km };
+        if (isNewMilestone) {
+            updateData.lastMaintenanceKm = nextMaintenanceMilestone;
+        }
+
+        // Update the vehicle in the database
+        const result = await updateVehicleKmInDB(id, updateData);
         if (result.modifiedCount > 0) {
+            // If new maintenance milestone, send an email notification
+            if (isNewMilestone) {
+                await notifyMaintenance(vehicle, Km);
+            }
             res.status(200).send({ message: 'Vehicle Km updated successfully' });
         } else {
             res.status(404).send({ error: 'Vehicle not found or Km not updated' });
@@ -104,5 +129,23 @@ async function updateVehicleKm(req, res) {
         res.status(500).send({ error: 'Internal server error' });
     }
 }
+
+async function notifyMaintenance(vehicle, Km) {
+    const subject = `Vehicle Maintenance Alert for ${vehicle.Make} ${vehicle.Model}`;
+    const htmlContent = `
+        <p>The vehicle with plate number <strong>${vehicle.carPlateNumber}</strong> has reached a maintenance milestone.</p>
+        <p><strong>Current Km:</strong> ${Km} km</p>
+        <p>This vehicle requires maintenance at every 10,000 km milestone.</p>
+    `;
+    const adminEmail = process.env.ADMIN_EMAIL || 'chatgptuser885@gmail.com';
+
+    try {
+        await sendEmail(adminEmail, subject, htmlContent);
+        console.log(`Maintenance email sent for vehicle with ID ${vehicle.VehicleID}`);
+    } catch (error) {
+        console.error('Error sending maintenance email:', error);
+    }
+}
+
 
 module.exports = { getVehicles, getVehicle, createVehicle, updateVehicle, updateVehicleKm , deleteVehicle };

@@ -19,6 +19,24 @@ async function getBookingsFromDB(query = {}, projection = {}) {
     }
 }
 
+async function getUpcomingBookingsWithinOneDay() {
+    const oneDayFromNow = new Date();
+    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+
+    const query = {
+        DepartureTime: { $lte: oneDayFromNow },
+        status: 'Confirmed'
+    };
+
+    try {
+        const upcomingBookings = await getBookingsFromDB(query);
+        return upcomingBookings;
+    } catch (error) {
+        console.error('Error fetching upcoming bookings:', error);
+        throw error;
+    }
+}
+
 async function getBookingByIDInDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
     try {
@@ -80,5 +98,6 @@ module.exports = {
     getBookingByIDInDB,
     createBookingInDB,
     updateBookingInDB,
-    deleteBookingFromDB
+    deleteBookingFromDB,
+    getUpcomingBookingsWithinOneDay
 };
