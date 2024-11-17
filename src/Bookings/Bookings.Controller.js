@@ -29,9 +29,9 @@ async function getBookingByID(req, res) {
 }
 
 async function createBooking(req, res) {
-    const { UserID, VehicleID, status, DepartureTime, Passengers, PickupAddress, DropOffAddress, FullName, Email, PhoneNumber, startTrailDate, endTrailDate, stopStations, notes } = req.body;
+    const { UserID, status, Passengers, PickupAddress, DropOffAddress, FullName, Email, PhoneNumber, startTrailDate, endTrailDate, stopStations, notes } = req.body;
 
-    if (!UserID || !VehicleID || !status || !DepartureTime || !Passengers || !PickupAddress || !DropOffAddress || !FullName || !Email || !PhoneNumber || !startTrailDate || !endTrailDate) {
+    if (!UserID || !status || !Passengers || !PickupAddress || !DropOffAddress || !FullName || !Email || !PhoneNumber || !startTrailDate || !endTrailDate) {
         return res.status(400).send({ error: 'All required fields must be provided' });
     }
 
@@ -40,9 +40,7 @@ async function createBooking(req, res) {
         const newBooking = new Booking({
             BookingID: bookingID,
             UserID,
-            VehicleID,
             status,
-            DepartureTime,
             Passengers,
             PickupAddress,
             DropOffAddress,
