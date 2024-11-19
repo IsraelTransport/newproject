@@ -19,8 +19,8 @@ async function sendBookingReminders() {
     try {
         const upcomingBookings = await getUpcomingBookingsWithinOneDay();
 
-        if (upcomingBookings.length === 0) {
-            console.log("No upcoming bookings found for reminder.");
+        if (!upcomingBookings || upcomingBookings.length === 0) {
+            console.log("No upcoming bookings found for reminders.");
             return;
         }
 
@@ -28,10 +28,11 @@ async function sendBookingReminders() {
             console.log(`Preparing to send reminder for Booking ID: ${booking.BookingID}`);
 
             const subject = `Reminder: Upcoming Booking on ${booking.DepartureTime.toDateString()}`;
-            const htmlContent = `<p>Dear ${booking.FullName},</p>
+            const htmlContent = `
+                <p>Dear ${booking.FullName},</p>
                 <p>This is a reminder for your upcoming booking scheduled on ${booking.DepartureTime.toDateString()}.</p>
-                <p>Pickup Address: ${booking.PickupAddress}</p>
-                <p>Drop-Off Address: ${booking.DropOffAddress}</p>
+                <p><strong>Pickup Address:</strong> ${booking.PickupAddress}</p>
+                <p><strong>Drop-Off Address:</strong> ${booking.DropOffAddress}</p>
                 <p>Please contact us if you have any questions.</p>`;
 
             await sendEmail(booking.Email, subject, htmlContent);
@@ -41,6 +42,7 @@ async function sendBookingReminders() {
         console.error('Error sending booking reminders:', error);
     }
 }
+
 
 async function getBookingByID(req, res) {
     const { id } = req.params;

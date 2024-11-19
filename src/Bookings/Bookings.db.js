@@ -20,12 +20,16 @@ async function getBookingsFromDB(query = {}, projection = {}) {
 }
 
 async function getUpcomingBookingsWithinOneDay() {
+    const now = new Date(); // Current time
     const oneDayFromNow = new Date();
-    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+    oneDayFromNow.setDate(now.getDate() + 1); // 24 hours from now
 
     const query = {
-        DepartureTime: { $lte: oneDayFromNow },
-        status: 'Confirmed'
+        DepartureTime: { 
+            $gte: now,        // Fetch only future bookings
+            $lt: oneDayFromNow // Up to 24 hours from now
+        },
+        status: 'Confirmed' // Only confirmed bookings
     };
 
     try {
@@ -36,6 +40,7 @@ async function getUpcomingBookingsWithinOneDay() {
         throw error;
     }
 }
+
 
 async function getBookingByIDInDB(id) {
     let mongo = new MongoClient(DB_INFO.uri);
