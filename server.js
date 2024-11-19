@@ -24,12 +24,12 @@ mongoose.connect(process.env.CONNECTION_STRING, {
     console.error('Error connecting to MongoDB:', error);
 });
 
-cron.schedule('* * * * *', async () => { // Runs every minute
+cron.schedule('0 8 * * *', async () => { // Runs every day at 8:00 AM
     try {
-        console.log("Running reminder job every minute...");
+        console.log("Running daily reminder job at 8:00 AM...");
         await sendBookingReminders();
     } catch (error) {
-        console.error('Error running reminder job:', error);
+        console.error('Error running daily reminder job:', error);
     }
 }, {
     timezone: "Asia/Jerusalem" // Set timezone to Israel
