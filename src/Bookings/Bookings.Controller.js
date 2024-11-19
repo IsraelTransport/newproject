@@ -19,20 +19,22 @@ async function sendBookingReminders() {
     try {
         const upcomingBookings = await getUpcomingBookingsWithinOneDay();
 
-        if (!upcomingBookings || upcomingBookings.length === 0) {
-            console.log("No upcoming bookings found for reminders.");
+        if (upcomingBookings.length === 0) {
+            console.log("No upcoming bookings found for reminder.");
             return;
         }
 
         for (const booking of upcomingBookings) {
             console.log(`Preparing to send reminder for Booking ID: ${booking.BookingID}`);
 
-            const subject = `Reminder: Upcoming Booking on ${booking.DepartureTime.toDateString()}`;
-            const htmlContent = `
-                <p>Dear ${booking.FullName},</p>
-                <p>This is a reminder for your upcoming booking scheduled on ${booking.DepartureTime.toDateString()}.</p>
-                <p><strong>Pickup Address:</strong> ${booking.PickupAddress}</p>
-                <p><strong>Drop-Off Address:</strong> ${booking.DropOffAddress}</p>
+            // Ensure startTrailDate is a Date object
+            const startTrailDate = new Date(booking.startTrailDate);
+
+            const subject = `Reminder: Upcoming Booking on ${startTrailDate.toDateString()}`;
+            const htmlContent = `<p>Dear ${booking.FullName},</p>
+                <p>This is a reminder for your upcoming booking scheduled on ${startTrailDate.toDateString()}.</p>
+                <p>Pickup Address: ${booking.PickupAddress}</p>
+                <p>Drop-Off Address: ${booking.DropOffAddress}</p>
                 <p>Please contact us if you have any questions.</p>`;
 
             await sendEmail(booking.Email, subject, htmlContent);
@@ -42,6 +44,7 @@ async function sendBookingReminders() {
         console.error('Error sending booking reminders:', error);
     }
 }
+
 
 
 async function getBookingByID(req, res) {

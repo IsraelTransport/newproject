@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb');
+const { DateTime } = require('luxon'); // Use luxon for timezone handling
 
 const DB_INFO = {
     uri: process.env.CONNECTION_STRING,
@@ -20,26 +21,38 @@ async function getBookingsFromDB(query = {}, projection = {}) {
 }
 
 async function getUpcomingBookingsWithinOneDay() {
-    const now = new Date(); // Current time
-    const oneDayFromNow = new Date();
-    oneDayFromNow.setDate(now.getDate() + 1); // 24 hours from now
+    const now = new Date();
+    const israelTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem' }));
+
+    const startOfTomorrow = new Date(israelTime);
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+    startOfTomorrow.setHours(0, 0, 0, 0); // Set to 00:00:00
+
+    const endOfTomorrow = new Date(startOfTomorrow);
+    endOfTomorrow.setHours(23, 59, 59, 999); // Set to 23:59:59
+
+    console.log(`Start of tomorrow (Israel time): ${startOfTomorrow}`);
+    console.log(`End of tomorrow (Israel time): ${endOfTomorrow}`);
 
     const query = {
-        DepartureTime: { 
-            $gte: now,        // Fetch only future bookings
-            $lt: oneDayFromNow // Up to 24 hours from now
+        startTrailDate: {
+            $gte: startOfTomorrow, // Greater than or equal to 00:00:00
+            $lte: endOfTomorrow // Less than or equal to 23:59:59
         },
         status: 'Confirmed' // Only confirmed bookings
     };
 
     try {
         const upcomingBookings = await getBookingsFromDB(query);
+        console.log(`Upcoming bookings: ${JSON.stringify(upcomingBookings)}`);
         return upcomingBookings;
     } catch (error) {
         console.error('Error fetching upcoming bookings:', error);
         throw error;
     }
 }
+
+
 
 
 async function getBookingByIDInDB(id) {
