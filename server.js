@@ -24,9 +24,9 @@ mongoose.connect(process.env.CONNECTION_STRING, {
     console.error('Error connecting to MongoDB:', error);
 });
 
-cron.schedule('0 8 * * *', async () => {
+cron.schedule('53 22 * * *', async () => {
     try {
-        console.log("Running daily reminder job at 8:00 AM...");
+        console.log("Running daily reminder job at 22:53 AM...");
         await sendBookingReminders();
     } catch (error) {
         console.error('Error running daily reminder job:', error);
